@@ -14,16 +14,16 @@ const Services = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  
-  const services = [
+
+  const defaultServices = [
     {
       title: "Corporates",
       description: "ROI-driven experiential programs that help teams work better, feel better, and grow together through leadership and wellness.",
       image: "/corporate/newCorporateHero.JPG",
       href: "/corporate",
       objectPosition: "center 30%",
-      titleColor: "#A3B6DC", // Muted brand blue
-      buttonHoverColor: "#394E84" // Brand blue
+      titleColor: "#A3B6DC",
+      buttonHoverColor: "#394E84"
     },
     {
       title: "Classrooms",
@@ -31,8 +31,8 @@ const Services = () => {
       image: "/classroom/hero/newClassroomHero.jpg",
       href: "/classrooms",
       scale: 1.4,
-      titleColor: "#FCD34D", // Muted amber/gold
-      buttonHoverColor: "#EAB308" // Yellow
+      titleColor: "#FCD34D",
+      buttonHoverColor: "#EAB308"
     },
     {
       title: "Communities",
@@ -42,8 +42,8 @@ const Services = () => {
       objectPosition: "center 90%",
       scale: 1.4,
       translateY: -50,
-      titleColor: "#6EE7B7", // Muted teal/green
-      buttonHoverColor: "#22C55E" // Green
+      titleColor: "#6EE7B7",
+      buttonHoverColor: "#22C55E"
     },
     {
       title: "Clinics",
@@ -52,10 +52,26 @@ const Services = () => {
       href: "/clinical",
       objectPosition: "center 20%",
       scale: 1.15,
-      titleColor: "#F9A8D4", // Muted rose/pink
-      buttonHoverColor: "#FB923C" // Peach/Orange
+      titleColor: "#F9A8D4",
+      buttonHoverColor: "#FB923C"
     }
   ]
+
+  const [servicesList, setServicesList] = useState<any[]>(defaultServices)
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/services?showOnHome=true`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setServicesList(res.data)
+        }
+      })
+      .catch(err => console.error("Error loading services:", err))
+  }, [])
+
+  const services = servicesList;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -157,7 +173,7 @@ const Services = () => {
   // Calculate animation values based on scroll progress
   // Use max progress to ensure animation only happens once
   const effectiveProgress = isSectionVisible ? Math.max(scrollProgress, maxProgress) : maxProgress
-  
+
   // Separate animation for text - earlier trigger and different easing
   const textProgress = Math.min(1, effectiveProgress * 2.5) // Faster text animation
   const textOpacity = Math.min(1, textProgress * 1.5)
@@ -168,7 +184,7 @@ const Services = () => {
     <>
       <section ref={sectionRef} className="pt-4 pb-20">
         <div className="container mx-auto px-4 md:px-0">
-          <div 
+          <div
             ref={textRef}
             className="transition-all duration-700 ease-out"
             style={{
@@ -184,17 +200,16 @@ const Services = () => {
               subtitleClassName="mb-16"
             />
           </div>
-          
+
           <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {services.map((service, index) => (
-              <Link 
+              <Link
                 key={index}
                 href={service.href}
-                className={`group relative h-[500px] overflow-hidden rounded-xl cursor-pointer block transition-all duration-1000 ${
-                  isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 -translate-y-32'
-                }`}
+                className={`group relative h-[500px] overflow-hidden rounded-xl cursor-pointer block transition-all duration-1000 ${isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 -translate-y-32'
+                  }`}
                 style={{
                   transitionDelay: isVisible ? `${index * 200}ms` : '0ms',
                   transitionTimingFunction: isVisible ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
@@ -202,10 +217,10 @@ const Services = () => {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                <div 
+                <div
                   className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
-                  style={service.scale ? { 
-                    transform: `scale(${service.scale})${service.translateY ? ` translateY(${service.translateY}px)` : ''}` 
+                  style={service.scale ? {
+                    transform: `scale(${service.scale})${service.translateY ? ` translateY(${service.translateY}px)` : ''}`
                   } : undefined}
                 >
                   <Image
@@ -218,17 +233,17 @@ const Services = () => {
                     }}
                   />
                 </div>
-                
+
                 {/* Strong gradient overlay for text readability - always visible */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent"></div>
-                
+
                 {/* Description and button - always visible */}
                 <div className="absolute bottom-0 left-0 right-0 z-10">
                   <div className="px-6 py-6">
                     <p className="text-gray-200 text-sm leading-relaxed mb-6 font-bricolage-text" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)' }}>
                       {service.description}
                     </p>
-                    <div 
+                    <div
                       className="px-4 py-2 border text-white rounded-lg font-medium inline-block transition-all duration-300"
                       style={{
                         backgroundColor: hoveredIndex === index ? service.buttonHoverColor : 'transparent',
@@ -239,7 +254,7 @@ const Services = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Title - positioned above description */}
                 <div className="absolute bottom-0 left-0 right-0 -translate-y-36 z-20">
                   <div className="px-6 py-6">

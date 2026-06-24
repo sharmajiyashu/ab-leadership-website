@@ -8,13 +8,47 @@ const Hero = () => {
   const [isTypingComplete, setIsTypingComplete] = useState(false)
   const [subtitleOpacity, setSubtitleOpacity] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
-
-  const titleText = "Shaping Wellbeing & Leadership Journeys"
+  const [heroData, setHeroData] = useState<{
+    title: string;
+    description: string;
+    image: string;
+    logosTitle: string;
+    logos: string[];
+  }>({
+    title: "Shaping Wellbeing & Leadership Journeys",
+    description: "Corporates · Classrooms · Communities · Clinics",
+    image: "/home/hero/IMG_2190.JPG",
+    logosTitle: "As Featured On",
+    logos: []
+  })
 
   useEffect(() => {
-    // Start typewriter effect after a short delay
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          setHeroData({
+            title: res.data.hero?.title || "Shaping Wellbeing & Leadership Journeys",
+            description: res.data.hero?.description || "Corporates · Classrooms · Communities · Clinics",
+            image: res.data.hero?.image || "/home/hero/IMG_2190.JPG",
+            logosTitle: res.data.logosTitle || "As Featured On",
+            logos: Array.isArray(res.data.logos) && res.data.logos.length > 0 ? res.data.logos : []
+          })
+        }
+      })
+      .catch(err => console.error("Error fetching homepage settings:", err))
+  }, [])
+
+  const titleText = heroData.title
+
+  useEffect(() => {
+    let currentIndex = 0
+    setDisplayedText("")
+    setIsTypingComplete(false)
+    setSubtitleOpacity(0)
+    
     const startDelay = setTimeout(() => {
-      let currentIndex = 0
       const typingInterval = setInterval(() => {
         if (currentIndex < titleText.length) {
           setDisplayedText(titleText.slice(0, currentIndex + 1))
@@ -29,7 +63,7 @@ const Hero = () => {
     }, 500)
 
     return () => clearTimeout(startDelay)
-  }, [])
+  }, [titleText])
 
   // Blink cursor effect
   useEffect(() => {
@@ -56,7 +90,7 @@ const Hero = () => {
       {/* Full Width Image */}
       <div className="relative w-full h-[400px] md:h-[550px] lg:h-[750px] overflow-hidden">
         <Image
-          src="/home/hero/IMG_2190.JPG"
+          src={heroData.image}
           alt="Abhishek Banerji - Professional Portrait"
           fill
           className="object-cover"
@@ -78,7 +112,7 @@ const Hero = () => {
               className="text-lg md:text-2xl lg:text-3xl max-w-3xl mx-auto font-bricolage-text transition-opacity duration-1000 ease-in-out mt-4"
               style={{ opacity: subtitleOpacity }}
             >
-              Corporates · Classrooms · Communities · Clinics
+              {heroData.description}
             </p>
           </div>
         </div>
@@ -88,7 +122,7 @@ const Hero = () => {
       <div className="bg-transparent hero-logo-slider">
         <div className="max-w-full mx-auto bg-transparent">
           <h2 className="text-2xl font-bold text-gray-600 text-center pt-8 mb-6 font-bricolage-display">
-            As Featured On
+            {heroData.logosTitle}
           </h2>
           <Slider
             width="300px"
@@ -97,139 +131,22 @@ const Hero = () => {
             blurBorders={false}
             blurBorderColor="transparent"
           >
-            {/* Company Logos */}
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/1.png"
-                  alt="Company Logo 1"
-                  width={300}
-                  height={300}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/2.png"
-                  alt="Company Logo 2"
-                  width={300}
-                  height={300}
-                  className="w-96 h-96 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/3.png"
-                  alt="Company Logo 3"
-                  width={300}
-                  height={300}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/4.png"
-                  alt="Company Logo 4"
-                  width={300}
-                  height={300}
-                  className="w-96 h-96 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/5.png"
-                  alt="Company Logo 5"
-                  width={300}
-                  height={300}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/6.png"
-                  alt="Company Logo 6"
-                  width={400}
-                  height={400}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/7.png"
-                  alt="Company Logo 7"
-                  width={400}
-                  height={400}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/8.png"
-                  alt="Company Logo 8"
-                  width={400}
-                  height={400}
-                  className="w-96 h-96 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/9.png"
-                  alt="Company Logo 9"
-                  width={400}
-                  height={300}
-                  className="w-96 h-96 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/10.png"
-                  alt="Company Logo 10"
-                  width={400}
-                  height={400}
-                  className="w-96 h-96 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/11.png"
-                  alt="Company Logo 11"
-                  width={400}
-                  height={400}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
-            <Slider.Slide>
-              <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                <Image
-                  src="/home/heroLogos/12.png"
-                  alt="Company Logo 12"
-                  width={400}
-                  height={400}
-                  className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
-                />
-              </div>
-            </Slider.Slide>
+            {(heroData.logos.length > 0
+              ? heroData.logos
+              : Array.from({ length: 12 }, (_, i) => `/home/heroLogos/${i + 1}.png`)
+            ).map((logo, index) => (
+              <Slider.Slide key={index}>
+                <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
+                  <Image
+                    src={logo}
+                    alt={`Featured Logo ${index + 1}`}
+                    width={300}
+                    height={300}
+                    className="w-80 h-80 object-contain filter grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105"
+                  />
+                </div>
+              </Slider.Slide>
+            ))}
           </Slider>
         </div>
       </div>

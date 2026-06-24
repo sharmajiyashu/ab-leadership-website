@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { biographyParagraphs } from '@/app/about/data/biographyContent'
 
 const VideoSection = () => {
   const [isVideoVisible, setIsVideoVisible] = useState(false)
@@ -80,15 +79,15 @@ const VideoSection = () => {
     const currentSectionRef = sectionRef.current
     const currentVideoRef = videoRef.current
     const currentTextRef = textRef.current
-    
+
     if (currentSectionRef) {
       sectionObserver.observe(currentSectionRef)
     }
-    
+
     if (currentTextRef) {
       textObserver.observe(currentTextRef)
     }
-    
+
     if (currentVideoRef) {
       videoObserver.observe(currentVideoRef)
     }
@@ -111,18 +110,80 @@ const VideoSection = () => {
     }
   }, [maxProgress])
 
+  const [videoData, setVideoData] = useState<{
+    title: string;
+    description: string;
+    videoUrl: string;
+    paragraphs?: string[];
+  }>({
+    title: "See Us In Action",
+    description: "Watch our introductory video feature.",
+    videoUrl: "https://www.youtube.com/watch?v=IKDfjU1huhI&t=103s",
+    paragraphs: []
+  })
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data?.videoSection) {
+          setVideoData(prev => ({
+            ...prev,
+            ...res.data.videoSection
+          }));
+        }
+      })
+      .catch(err => console.error("Error loading video section:", err))
+  }, [])
+
+  const paragraphs = Array.isArray(videoData.paragraphs) && videoData.paragraphs.length > 0
+    ? videoData.paragraphs
+    : [
+      "Abhishek Banerji is a United Nations Karmaveer Chakra Award–winning psychologist, TEDX speaker, theatre artist and director, corporate wellbeing and leadership consultant, and former chemical engineer with deep multidisciplinary expertise. Rooted in a strengths-based, human-centred approach, he is also a DEIB (Diversity, Equity, Inclusion and Belonging) practitioner.",
+      "A two-time gold medalist from the Tata Institute of Social Sciences (TISS), Mumbai and a UGC NET qualified visiting faculty there, his work sits at the intersection of mental health, leadership, education, and the performing arts.",
+      "Over the past decade, he has co-created leadership and wellness interventions with Fortune 500 companies, educational institutions, NGOs, startups, and clinical settings, drawing on psychotherapeutic frameworks, behavioural science, inclusive design, and evidence-based practice.",
+      "His work strengthens individual well-being, team effectiveness, leadership capability, and organisational culture. Guided by holistic, integrative wellness, Abhishek works across the four C's-Clinics, Classrooms, Corporates, and Communities, translating psychological insight into context-sensitive, practice-first interventions that move people from awareness to action."
+    ];
+
+  const midIndex = Math.ceil(paragraphs.length / 2);
+  const leftParagraphs = paragraphs.slice(0, midIndex);
+  const rightParagraphs = paragraphs.slice(midIndex);
+
   // Extract video ID and start time from YouTube URL
-  const videoId = "IKDfjU1huhI"
-  const startTime = 103 // Start at 103 seconds as specified in the URL
+  const getYoutubeDetails = (url: string) => {
+    if (!url) return { videoId: "IKDfjU1huhI", startTime: 103 };
+    try {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      const videoId = (match && match[2].length === 11) ? match[2] : "IKDfjU1huhI";
+
+      let startTime = 0;
+      // Handle timestamp search params like ?t=103 or &start=103
+      if (url.includes("t=")) {
+        const parts = url.split("t=");
+        const tVal = parts[1]?.split("&")[0]?.split("s")[0];
+        startTime = parseInt(tVal) || 0;
+      } else if (url.includes("start=")) {
+        const parts = url.split("start=");
+        startTime = parseInt(parts[1]?.split("&")[0]) || 0;
+      }
+      return { videoId, startTime };
+    } catch (e) {
+      return { videoId: "IKDfjU1huhI", startTime: 103 };
+    }
+  }
+
+  const { videoId, startTime } = getYoutubeDetails(videoData.videoUrl);
 
   // Calculate animation values based on scroll progress
   // Use max progress to ensure animation only happens once
   const effectiveProgress = isSectionVisible ? Math.max(scrollProgress, maxProgress) : maxProgress
-  
+
   const fadeOpacity = Math.min(1, effectiveProgress * 2)
   const scaleValue = 1 + (effectiveProgress * 0.2)
   const translateY = (1 - effectiveProgress) * 50
-  
+
   // Separate animation for text - earlier trigger and different easing
   const textProgress = Math.min(1, effectiveProgress * 2.5) // Faster text animation
   const textOpacity = Math.min(1, textProgress * 1.5)
@@ -133,7 +194,7 @@ const VideoSection = () => {
     <section ref={sectionRef} className="relative px-32 py-4">
       <div className="max-w-7xl mx-auto space-y-12 relative z-10">
         {/* Combined Text Section - Above Video */}
-        <div 
+        <div
           ref={textRef}
           className="max-w-7xl mx-auto pb-8 transition-all duration-700 ease-out"
           style={{
@@ -144,7 +205,7 @@ const VideoSection = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              {biographyParagraphs.slice(0, 2).map((paragraph, index) => (
+              {leftParagraphs.map((paragraph, index) => (
                 <p
                   key={index}
                   className="text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
@@ -155,7 +216,7 @@ const VideoSection = () => {
             </div>
 
             <div className="space-y-6">
-              {biographyParagraphs.slice(2, 4).map((paragraph, index) => (
+              {rightParagraphs.map((paragraph, index) => (
                 <p
                   key={index}
                   className="text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
@@ -169,7 +230,7 @@ const VideoSection = () => {
 
         {/* YouTube Video */}
         <div ref={videoRef} className="flex justify-center">
-          <div 
+          <div
             className="w-full max-w-4xl pb-16 transition-all duration-700 ease-out"
             style={{
               opacity: fadeOpacity,
@@ -192,7 +253,7 @@ const VideoSection = () => {
                   <div className="text-center text-white">
                     <div className="w-20 h-20 mx-auto mb-4 bg-red-600 rounded-full flex items-center justify-center">
                       <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
+                        <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
                     <p className="text-lg font-medium">TEDx Talk</p>
@@ -206,7 +267,7 @@ const VideoSection = () => {
 
         {/* Know More Button */}
         <div className="flex justify-center pb-12">
-          <Link 
+          <Link
             href="/about"
             className="px-8 py-3 bg-gray-900 hover:bg-[#0047AB] text-white rounded-lg font-bold text-lg transition-colors duration-300 font-bricolage-text"
           >

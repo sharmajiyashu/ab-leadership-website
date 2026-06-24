@@ -4,14 +4,39 @@ import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 
-const LOGO_TABS = [
+const DEFAULT_LOGO_TABS = [
   { id: 'corporates', label: 'Corporates', src: '/home/logo/corporates.png', alt: 'Proud to work with – Corporates' },
   { id: 'classrooms', label: 'Classrooms', src: '/home/logo/classrooms.png', alt: 'Proud to work with – Classrooms' },
   { id: 'communities', label: 'Communities', src: '/home/logo/communities.png', alt: 'Proud to work with – Communities' },
   { id: 'clinics', label: 'Clinics', src: '/home/logo/clinics.png', alt: 'Proud to work with – Clinics' },
-] as const
+]
 
 const Logos = () => {
+  const [partnersInfo, setPartnersInfo] = useState({
+    title: "Proud to work with",
+    description: "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+  })
+  const [logoTabs, setLogoTabs] = useState<any[]>(DEFAULT_LOGO_TABS)
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data?.partnersSection) {
+          setPartnersInfo({
+            title: res.data.partnersSection.title || "Proud to work with",
+            description: res.data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics..."
+          })
+          if (Array.isArray(res.data.partnersSection.tabs) && res.data.partnersSection.tabs.length > 0) {
+            setLogoTabs(res.data.partnersSection.tabs)
+          }
+        }
+      })
+      .catch(err => console.error("Error loading partners:", err))
+  }, [])
+
+  const LOGO_TABS = logoTabs;
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [maxProgress, setMaxProgress] = useState(0)
@@ -129,10 +154,10 @@ const Logos = () => {
         >
           <SectionHeading
             className="pt-8"
-            subtitle="Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+            subtitle={partnersInfo.description}
             subtitleClassName="mb-16"
           >
-            Proud to <span className="text-[#0047AB]">work</span> with
+            {partnersInfo.title}
           </SectionHeading>
         </div>
 

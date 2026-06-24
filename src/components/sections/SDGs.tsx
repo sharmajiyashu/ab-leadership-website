@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import SectionHeading from './SectionHeading'
 
-// SDG data with official colors, names, and image paths
-const SDG_DATA = [
+// Default SDG data with official colors, names, and image paths
+const DEFAULT_SDG_DATA = [
   { 
     id: 3, 
     name: 'Good Health and Well-being', 
@@ -45,6 +45,38 @@ const SDG_DATA = [
 ]
 
 const SDGs = () => {
+  const [sdgContainer, setSdgContainer] = useState({
+    title: "Sustainable Development Goals",
+    description: "Our work is aligned with the United Nations Sustainable Development Goals, contributing to a more equitable, healthy, and sustainable world.",
+    backgroundImage: "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+  })
+  const [goalsList, setGoalsList] = useState<any[]>(DEFAULT_SDG_DATA)
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data?.sdgs) {
+          setSdgContainer({
+            title: res.data.sdgs.title || "Sustainable Development Goals",
+            description: res.data.sdgs.description || "Our work is aligned with the United Nations Sustainable Development Goals...",
+            backgroundImage: res.data.sdgs.backgroundImage || "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+          })
+          if (Array.isArray(res.data.sdgs.goals) && res.data.sdgs.goals.length > 0) {
+            // Map backend goals to match keys or values
+            const mapped = res.data.sdgs.goals.map((g: any) => ({
+              id: g.number,
+              name: g.title,
+              color: g.color || "#1E3A8A",
+              image: g.icon || "/home/sdgs/SDG3.jpeg" // Fallback if no icon
+            }))
+            setGoalsList(mapped)
+          }
+        }
+      })
+      .catch(err => console.error("Error loading SDGs settings:", err))
+  }, [])
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -164,7 +196,7 @@ const SDGs = () => {
       >
         <div className="relative w-full h-full">
           <Image
-            src="/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+            src={sdgContainer.backgroundImage}
             alt="SDG Background"
             fill
             className="object-cover"
@@ -189,13 +221,13 @@ const SDGs = () => {
         >
           <SectionHeading
             variant="onDark"
-            title="Sustainable Development Goals"
-            subtitle="Our work is aligned with the United Nations Sustainable Development Goals, contributing to a more equitable, healthy, and sustainable world."
+            title={sdgContainer.title}
+            subtitle={sdgContainer.description}
           />
         </div>
         
         <div ref={cardsRef} className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 max-w-7xl mx-auto">
-          {SDG_DATA.map((sdg, index) => (
+          {goalsList.map((sdg, index) => (
             <div
               key={sdg.id}
               className={`group relative rounded-xl overflow-hidden transition-all duration-500 cursor-pointer shadow-lg hover:shadow-2xl ${
