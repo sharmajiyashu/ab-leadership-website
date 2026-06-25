@@ -1,19 +1,19 @@
 import type { Metadata } from 'next'
 
 type Props = {
-  params: { categorySlug: string }
+  params: Promise<{ categorySlug: string }>
 }
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const slug = params.categorySlug
+  const { categorySlug: slug } = await params
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     const res = await fetch(`${apiUrl}/v1/api/app/categories/slug/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return {};
     const { data } = await res.json();
-    
+
     if (data?.seo) {
       const ogImage = typeof data.seo.ogImage === 'string' ? data.seo.ogImage : data.seo.ogImage?.url;
       return {
@@ -30,7 +30,7 @@ export async function generateMetadata(
   } catch (error) {
     console.error(`Error fetching metadata for category ${slug}:`, error);
   }
-  
+
   return {
     title: 'Category',
   }

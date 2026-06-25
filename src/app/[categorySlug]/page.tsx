@@ -18,6 +18,7 @@ interface Service {
   image: any;
   slug: string;
   href?: string;
+  showOnHome?: boolean;
 }
 
 interface CategoryData {
@@ -33,6 +34,25 @@ interface CategoryData {
   partnerTitle?: string;
   partnerSubtitle?: string;
   partnerImage?: any;
+  howWeDoIt?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    backgroundImage?: any;
+    steps: Array<{ title: string; description: string }>;
+  };
+  modalities?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    items: Array<{ title: string; description: string; icon?: any; color: string; practices: string[] }>;
+  };
+  whyChooseUs?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    points: Array<{ title: string; description: string; image?: any }>;
+  };
   services: Service[];
 }
 
@@ -73,7 +93,7 @@ export default function CategoryDetailPage() {
   // Typewriter effect when category changes
   useEffect(() => {
     if (!category) return
-    
+
     setDisplayedText('')
     setIsTypingComplete(false)
     setSubtitleOpacity(0)
@@ -156,7 +176,7 @@ export default function CategoryDetailPage() {
   }
 
   // Default gallery mapping matching current static layouts if database returns empty
-  const defaultGalleries: Record<string, Array<{src: string, alt: string, size: 'medium'}>> = {
+  const defaultGalleries: Record<string, Array<{ src: string, alt: string, size: 'medium' }>> = {
     classrooms: [
       { src: '/classroom/classroomGallery/1.jpg', alt: 'Classroom Learning Experience', size: 'medium' },
       { src: '/classroom/classroomGallery/2.JPG', alt: 'Classroom Learning Experience', size: 'medium' },
@@ -202,13 +222,12 @@ export default function CategoryDetailPage() {
             <div className="text-center text-white px-4 max-w-5xl">
               <h1 className="text-4xl md:text-6xl font-bold font-bricolage-display">
                 {displayedText}
-                <span 
-                  className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${
-                    showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'
-                  }`}
+                <span
+                  className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'
+                    }`}
                 />
               </h1>
-              <p 
+              <p
                 className="text-xl md:text-2xl max-w-3xl mx-auto font-bricolage-text transition-opacity duration-1000 ease-in-out mt-3"
                 style={{ opacity: subtitleOpacity }}
               >
@@ -224,7 +243,7 @@ export default function CategoryDetailPage() {
             <div className="space-y-8">
               {category.descriptionParagraphs?.map((para, idx) => {
                 return (
-                  <p 
+                  <p
                     key={idx}
                     className="text-lg text-gray-700 leading-relaxed text-justify font-bricolage-text"
                   >
@@ -237,7 +256,7 @@ export default function CategoryDetailPage() {
         </section>
 
         {/* What do we do? Section */}
-        {category.services && category.services.length > 0 && (
+        {category.services && category.services.filter(s => !s.showOnHome).length > 0 && (
           <section className="py-16">
             <div className="text-center mb-12 px-4">
               <SectionHeading
@@ -250,10 +269,10 @@ export default function CategoryDetailPage() {
             </div>
 
             <div className="space-y-12 md:space-y-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {category.services.map((service, index) => {
+              {category.services.filter(s => !s.showOnHome).map((service, index) => {
                 const isEven = index % 2 === 0;
                 const pillarStyles = getPillarStyles(index);
-                
+
                 // Button colors based on index matching the original designs
                 const btnColors = [
                   "text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white hover:border-blue-600",
@@ -263,12 +282,12 @@ export default function CategoryDetailPage() {
                 const btnClass = btnColors[index % btnColors.length];
 
                 return (
-                  <div 
+                  <div
                     key={service._id}
-                    className={`flex flex-col md:flex-row${!isEven ? '-reverse' : ''} group cursor-pointer`}
+                    className={`flex flex-col ${!isEven ? 'md:flex-row-reverse' : 'md:flex-row'} group cursor-pointer`}
                   >
                     {/* Image Side */}
-                    <div className="animate-what-we-do-image relative w-full md:w-1/2 h-[400px] md:h-[500px] overflow-hidden rounded-2xl">
+                    <div className="animate-what-we-do-image relative w-full md:w-1/2 aspect-[4/3] md:aspect-[3/4] overflow-hidden rounded-2xl">
                       {service.image ? (
                         <DynamicMedia
                           media={service.image}
@@ -306,14 +325,10 @@ export default function CategoryDetailPage() {
           </section>
         )}
 
-        {/* Custom Corporate Modules */}
-        {category.slug === 'corporate' && (
-          <>
-            <HowWeDoIt />
-            <Modalities />
-            <WhyChooseUs />
-          </>
-        )}
+        {/* Shared Category Modules */}
+        {category.howWeDoIt?.isActive && <HowWeDoIt data={category.howWeDoIt} />}
+        {category.modalities?.isActive && <Modalities data={category.modalities} />}
+        {category.whyChooseUs?.isActive && <WhyChooseUs data={category.whyChooseUs} />}
 
         {/* Dynamic Partner Logos Section */}
         {category.partnerImage && (
@@ -327,7 +342,7 @@ export default function CategoryDetailPage() {
               >
                 {category.partnerTitle || "Proud to work with"}
               </SectionHeading>
-              
+
               <div className="max-w-full mx-auto flex items-center justify-center">
                 <div className="relative w-full max-w-6xl h-64 md:h-96 lg:h-[28rem]">
                   <DynamicMedia

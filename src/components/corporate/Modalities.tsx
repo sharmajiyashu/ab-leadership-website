@@ -107,7 +107,7 @@ const listItemVariants = {
   },
 }
 
-function FloatingModalityIcon({ src, index }: { src: string; index: number }) {
+function FloatingModalityIcon({ src, index }: { src: any; index: number }) {
   const prefersReducedMotion = useReducedMotion()
   const floatDuration = 3.2 + index * 0.35
 
@@ -174,15 +174,24 @@ function FloatingModalityIcon({ src, index }: { src: string; index: number }) {
                   transition: { duration: 0.35, ease },
                 }
           }
-          className="relative cursor-default"
+          className="relative cursor-default h-[6.5rem] w-[6.5rem] sm:h-[7.5rem] sm:w-[7.5rem] md:h-[8.5rem] md:w-[8.5rem] lg:h-[9.5rem] lg:w-[9.5rem] drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] md:drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] lg:drop-shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
         >
-          <Image
-            src={src}
-            alt=""
-            width={152}
-            height={152}
-            className="h-[6.5rem] w-[6.5rem] shrink-0 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] sm:h-[7.5rem] sm:w-[7.5rem] md:h-[8.5rem] md:w-[8.5rem] md:drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] lg:h-[9.5rem] lg:w-[9.5rem] lg:drop-shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
-          />
+          {typeof src === 'string' ? (
+            <Image
+              src={src || "/placeholder-icon.png"}
+              alt=""
+              width={152}
+              height={152}
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <DynamicMedia
+              media={src || "/placeholder-icon.png"}
+              alt=""
+              fill
+              className="object-contain"
+            />
+          )}
         </motion.div>
       </motion.div>
     </div>
@@ -305,23 +314,34 @@ function ModalitySectionHeader({
   )
 }
 
-export default function Modalities() {
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
+
+interface ModalitiesProps {
+  data?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    items: Array<{ title: string; description: string; icon?: any; color: string; practices: string[] }>;
+  };
+}
+
+export default function Modalities({ data }: ModalitiesProps) {
+  const activeTitle = data?.title || "Modalities and Approaches";
+  const activeSubtitle = data?.subtitle || "A multidisciplinary blend of psychology, coaching, expressive arts, and behavioural sciences to strengthen people, teams, and workplace culture.";
+  const activeItems = (data?.items && data.items.length > 0) ? data.items : modalityColumns;
+
   return (
     <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto w-full max-w-[min(100%,100rem)]">
         <ModalitySectionHeader
-          title={
-            <>
-              <span className="text-[#0047AB]">Modalities</span> and Approaches
-            </>
-          }
-          subtitle="A multidisciplinary blend of psychology, coaching, expressive arts, and behavioural sciences to strengthen people, teams, and workplace culture."
+          title={<span className="text-gray-800">{activeTitle}</span>}
+          subtitle={activeSubtitle}
         />
 
         <div className="mt-12 grid w-full grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-x-10 xl:gap-x-14">
-          {modalityColumns.map((column, index) => (
+          {activeItems.map((column, index) => (
             <motion.div
-              key={column.title}
+              key={column.title + index}
               variants={fadeUpVariants}
               initial="hidden"
               whileInView="visible"
@@ -336,18 +356,29 @@ export default function Modalities() {
               <div
                 className="relative mt-6 flex w-full flex-col rounded-3xl p-6 shadow-sm md:mt-7 md:p-8"
                 style={{
-                  backgroundColor: `color-mix(in srgb, ${column.color} 22%, white)`,
+                  backgroundColor: `color-mix(in srgb, ${column.color || '#e0e0e0'} 22%, white)`,
                 }}
               >
                 <p className="mb-5 text-center text-sm leading-relaxed text-gray-700 font-bricolage-text md:text-base">
                   {column.description}
                 </p>
-                <ModalityPracticesDropdown
-                  items={column.items}
-                  color={column.color}
-                  index={index}
-                  idPrefix="modality"
-                />
+                {(column as any).practices && (column as any).practices.length > 0 && (
+                  <ModalityPracticesDropdown
+                    items={(column as any).practices}
+                    color={column.color || '#0047AB'}
+                    index={index}
+                    idPrefix="modality"
+                  />
+                )}
+                {/* Fallback for static modalityColumns which use 'items' instead of 'practices' */}
+                {!(column as any).practices && (column as any).items && (
+                  <ModalityPracticesDropdown
+                    items={(column as any).items}
+                    color={column.color || '#0047AB'}
+                    index={index}
+                    idPrefix="modality"
+                  />
+                )}
               </div>
             </motion.div>
           ))}

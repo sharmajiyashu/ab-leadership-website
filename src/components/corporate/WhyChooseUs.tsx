@@ -3,8 +3,19 @@
 import Image from 'next/image'
 import SectionHeading from '@/components/sections/SectionHeading'
 
-export default function WhyChooseUs() {
-  const slides = [
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
+
+interface WhyChooseUsProps {
+  data?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    points: Array<{ title: string; description: string; image?: any }>;
+  };
+}
+
+export default function WhyChooseUs({ data }: WhyChooseUsProps) {
+  const defaultSlides = [
     {
       id: 1,
       title: "Experiential Learning",
@@ -49,6 +60,10 @@ export default function WhyChooseUs() {
     }
   ]
 
+  const activeTitle = data?.title || "Why Choose Us?";
+  const activeSubtitle = data?.subtitle || "A curated blend of immersive methods designed to shift mindsets, build skills, and create lasting change for your teams.";
+  const activeSlides = (data?.points && data.points.length > 0) ? data.points : defaultSlides;
+
   const cardStickyOffsets = [
     'md:top-32',
     'md:top-40',
@@ -83,12 +98,14 @@ export default function WhyChooseUs() {
                 <SectionHeading
                   align="left"
                   titleClassName="pl-7 md:pl-9 leading-[0.95] tracking-tight"
-                  subtitle="A curated blend of immersive methods designed to shift mindsets, build skills, and create lasting change for your teams."
+                  subtitle={activeSubtitle}
                   subtitleClassName="pl-7 md:pl-9 text-left max-w-none mb-0"
                 >
-                  <span className="block">Why</span>
-                  <span className="block text-[#0047AB]">Choose</span>
-                  <span className="block">Us?</span>
+                  {activeTitle.split(' ').map((word, i) => (
+                    <span key={i} className={`block ${i === 1 ? 'text-[#0047AB]' : ''}`}>
+                      {word}
+                    </span>
+                  ))}
                 </SectionHeading>
               </div>
             </div>
@@ -96,24 +113,34 @@ export default function WhyChooseUs() {
 
           {/* Right column: stacked sticky cards with Polaroid frame */}
           <div className="md:col-span-3 space-y-10 pb-32">
-            {slides.map((slide, index) => (
+            {activeSlides.map((slide: any, index) => (
               <div
-                key={slide.id}
+                key={index}
                 className={`w-full h-[360px] md:h-[420px] lg:h-[480px] md:sticky ${
-                  cardStickyOffsets[index] ?? 'md:top-80'
+                  cardStickyOffsets[index % cardStickyOffsets.length]
                 } ${cardTiltClasses[index % cardTiltClasses.length]}`}
               >
                 {/* Polaroid frame */}
                 <div className="h-full bg-white shadow-2xl px-4 pt-4 pb-16 md:px-5 md:pt-5 md:pb-20 flex">
                   <div className="relative w-full h-full overflow-hidden">
                     {/* Background Image */}
-                    <Image
-                      src={slide.image}
-                      alt={slide.title}
-                      fill
-                      className="object-cover"
-                      priority={index === 0}
-                    />
+                    {typeof slide.image === 'string' ? (
+                      <Image
+                        src={slide.image || "/placeholder-image.jpg"}
+                        alt={slide.title}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                    ) : (
+                      <DynamicMedia
+                        media={slide.image || "/placeholder-image.jpg"}
+                        alt={slide.title}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                    )}
 
                     {/* Dark overlay for text readability */}
                     <div className="absolute inset-0 bg-black/60" />

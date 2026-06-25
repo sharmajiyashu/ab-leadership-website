@@ -61,7 +61,7 @@ function VerticalRoad({ containerRef }: { containerRef: React.RefObject<HTMLElem
   )
 }
 
-function RoadStep({ step, index }: { step: typeof outcomeSteps[0]; index: number }) {
+function RoadStep({ step, index }: { step: { title: string; description: string }; index: number }) {
   return (
     <motion.li
       initial={{ opacity: 0, y: 40 }}
@@ -102,7 +102,19 @@ function RoadStep({ step, index }: { step: typeof outcomeSteps[0]; index: number
   )
 }
 
-const HowWeDoIt = () => {
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
+
+interface HowWeDoItProps {
+  data?: {
+    isActive: boolean;
+    title: string;
+    subtitle: string;
+    backgroundImage?: any;
+    steps: Array<{ title: string; description: string }>;
+  }
+}
+
+const HowWeDoIt = ({ data }: HowWeDoItProps) => {
   const containerRef = useRef<HTMLElement>(null)
   const backgroundRef = useRef<HTMLDivElement>(null)
 
@@ -113,6 +125,11 @@ const HowWeDoIt = () => {
 
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['-10%', '10%'])
 
+  const activeTitle = data?.title || "How we drive impact";
+  const activeSubtitle = data?.subtitle || "Anchored in the OUTCOME framework, our delivery approach focuses on execution, adoption, and measurable impact.";
+  const activeSteps = (data?.steps && data.steps.length > 0) ? data.steps : outcomeSteps;
+  const activeBg = data?.backgroundImage || "/corporate/howWeDoIt/skyscraper-1149547_1280.jpg";
+
   return (
     <>
       {/* Header Section - Outside parallax, no background */}
@@ -120,11 +137,11 @@ const HowWeDoIt = () => {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <SectionHeading
-              subtitle="Anchored in the OUTCOME framework, our delivery approach focuses on execution, adoption, and measurable impact."
+              subtitle={activeSubtitle}
               subtitleClassName="max-w-4xl mb-0"
               titleClassName="mb-6"
             >
-              How we drive <span className="text-[#0047AB]">impact</span>
+              {activeTitle}
             </SectionHeading>
           </div>
         </div>
@@ -144,13 +161,23 @@ const HowWeDoIt = () => {
             className="absolute inset-0 w-full h-full"
             style={{ y: backgroundY, scale: 1.1 }}
           >
-            <Image
-              src="/corporate/howWeDoIt/skyscraper-1149547_1280.jpg"
-              alt="Background"
-              fill
-              className="object-cover"
-              priority
-            />
+            {typeof activeBg === 'string' ? (
+              <Image
+                src={activeBg}
+                alt="Background"
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <DynamicMedia 
+                media={activeBg}
+                alt="Background"
+                fill
+                className="object-cover"
+                priority
+              />
+            )}
             {/* Overlay for text readability */}
             <div className="absolute inset-0 bg-black/50" />
           </motion.div>
@@ -164,7 +191,7 @@ const HowWeDoIt = () => {
 
             {/* Steps */}
             <ul className="space-y-24 relative md:space-y-20">
-              {outcomeSteps.map((step, index) => (
+              {activeSteps.map((step, index) => (
                 <RoadStep key={index} step={step} index={index} />
               ))}
             </ul>
