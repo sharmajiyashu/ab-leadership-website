@@ -21,44 +21,42 @@ const Logos = () => {
   const [logoTabs, setLogoTabs] = useState<any[]>(DEFAULT_LOGO_TABS)
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-    // Fetch homepage settings for title & description
-    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data?.partnersSection) {
-          setPartnersInfo({
-            title: res.data.partnersSection.title || "Proud to work with",
-            description: res.data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
-          })
-        }
-      })
-      .catch(err => console.error("Error loading partners info:", err));
-
-    // Fetch categories for the logo tabs
-    fetch(`${apiUrl}/v1/api/app/categories`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && Array.isArray(res.data)) {
-          const activeCategories = res.data.filter((cat: any) => cat.showPartnerOnHome !== false && cat.partnerImage);
-          if (activeCategories.length > 0) {
-            const newTabs = activeCategories.map((cat: any) => {
-              const partnerImg = cat.partnerImage;
-              const partnerUrl = typeof partnerImg === 'string' ? partnerImg : partnerImg?.url;
-              return {
-                id: cat.slug,
-                label: cat.name,
-                src: partnerUrl,
-                alt: cat.partnerTitle || `Proud to work with - ${cat.name}`
-              };
-            });
-            setLogoTabs(newTabs);
+    import('@/lib/api').then(({ get }) => {
+      // Fetch homepage settings for title & description
+      get<any>('/v1/api/app/homepage/settings')
+        .then(data => {
+          if (data?.partnersSection) {
+            setPartnersInfo({
+              title: data.partnersSection.title || "Proud to work with",
+              description: data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+            })
           }
-        }
-      })
-      .catch(err => console.error("Error loading categories for logos:", err))
-      .finally(() => setIsLoading(false));
+        })
+        .catch(err => console.error("Error loading partners info:", err));
+
+      // Fetch categories for the logo tabs
+      get<any>('/v1/api/app/categories')
+        .then(data => {
+          if (Array.isArray(data)) {
+            const activeCategories = data.filter((cat: any) => cat.showPartnerOnHome !== false && cat.partnerImage);
+            if (activeCategories.length > 0) {
+              const newTabs = activeCategories.map((cat: any) => {
+                const partnerImg = cat.partnerImage;
+                const partnerUrl = typeof partnerImg === 'string' ? partnerImg : partnerImg?.url;
+                return {
+                  id: cat.slug,
+                  label: cat.name,
+                  src: partnerUrl,
+                  alt: cat.partnerTitle || `Proud to work with - ${cat.name}`
+                };
+              });
+              setLogoTabs(newTabs);
+            }
+          }
+        })
+        .catch(err => console.error("Error loading categories for logos:", err))
+        .finally(() => setIsLoading(false));
+    });
   }, [])
 
   const LOGO_TABS = logoTabs;

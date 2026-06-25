@@ -51,17 +51,15 @@ export default function DynamicServicePage() {
 
   useEffect(() => {
     if (!serviceSlug) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
     setLoading(true);
-    fetch(`${apiUrl}/v1/api/app/services/slug/${serviceSlug}`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          setService(res.data);
-        }
-      })
-      .catch(err => console.error("Error loading service page details:", err))
-      .finally(() => setLoading(false));
+    import('@/lib/api').then(({ get }) => {
+      get<ServiceData>(`/v1/api/app/services/slug/${serviceSlug}`)
+        .then(data => {
+          if (data) setService(data);
+        })
+        .catch(err => console.error("Error loading service page details:", err))
+        .finally(() => setLoading(false));
+    });
   }, [serviceSlug]);
 
   if (loading) {

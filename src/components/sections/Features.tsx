@@ -21,15 +21,15 @@ export default function Features() {
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && Array.isArray(res.data?.features)) {
-          setFeatures(res.data.features)
-        }
-      })
-      .catch(err => console.error("Error loading features:", err))
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/homepage/settings')
+        .then(data => {
+          if (Array.isArray(data?.features)) {
+            setFeatures(data.features)
+          }
+        })
+        .catch(err => console.error("Error loading features:", err))
+    })
   }, [])
 
   useEffect(() => {

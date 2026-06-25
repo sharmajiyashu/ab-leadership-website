@@ -33,16 +33,14 @@ export default function AboutClient() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/about/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          setData(res.data);
-        }
-      })
-      .catch(err => console.error("Error fetching about page data:", err))
-      .finally(() => setIsLoading(false));
+    import('@/lib/api').then(({ get }) => {
+      get<AboutData>('/v1/api/app/about/settings')
+        .then(data => {
+          if (data) setData(data);
+        })
+        .catch(err => console.error("Error fetching about page data:", err))
+        .finally(() => setIsLoading(false));
+    });
   }, []);
 
   if (isLoading) {

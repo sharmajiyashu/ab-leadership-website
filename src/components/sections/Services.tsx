@@ -62,16 +62,16 @@ const Services = () => {
   const [servicesList, setServicesList] = useState<any[]>(defaultServices)
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/services?showOnHome=true`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          setServicesList(res.data)
-        }
-      })
-      .catch(err => console.error("Error loading services:", err))
-      .finally(() => setIsLoading(false))
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/services?showOnHome=true')
+        .then(data => {
+          if (Array.isArray(data)) {
+            setServicesList(data.slice(0, 4));
+          }
+        })
+        .catch(err => console.error("Error fetching services:", err))
+        .finally(() => setIsLoading(false));
+    });
   }, [])
 
   const services = servicesList;

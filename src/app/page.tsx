@@ -1,5 +1,11 @@
 import { Navbar, Footer } from '@/components/layout'
-import { Hero, VideoSection, Services, Logos, SDGs } from '@/components/sections'
+import dynamic from 'next/dynamic';
+import { get } from '@/lib/api';
+
+const Services = dynamic(() => import('@/components/sections/Services').then(mod => mod.default), {
+  ssr: true,
+});
+import { Hero, VideoSection, Logos, SDGs } from '@/components/sections'
 
 const backgroundImage = "/background.svg"
 
@@ -7,10 +13,7 @@ import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/homepage/settings`, { next: { revalidate: 60 } });
-    if (!res.ok) return {};
-    const { data } = await res.json();
+    const data = await get<any>('/v1/api/app/homepage/settings', { next: { revalidate: 60 } });
     
     if (data?.seo) {
       const ogImage = typeof data.seo.ogImage === 'string' ? data.seo.ogImage : data.seo.ogImage?.url;

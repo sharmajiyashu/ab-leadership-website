@@ -125,19 +125,19 @@ const VideoSection = () => {
   })
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data?.videoSection) {
-          setVideoData(prev => ({
-            ...prev,
-            ...res.data.videoSection
-          }));
-        }
-      })
-      .catch(err => console.error("Error loading video section:", err))
-      .finally(() => setIsLoading(false))
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/homepage/settings')
+        .then(data => {
+          if (data?.videoSection) {
+            setVideoData(prev => ({
+              ...prev,
+              ...data.videoSection
+            }));
+          }
+        })
+        .catch(err => console.error("Error loading video section:", err))
+        .finally(() => setIsLoading(false));
+    });
   }, [])
 
   const paragraphs = Array.isArray(videoData.paragraphs) && videoData.paragraphs.length > 0

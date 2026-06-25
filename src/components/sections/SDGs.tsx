@@ -55,36 +55,35 @@ const SDGs = () => {
   const [goalsList, setGoalsList] = useState<any[]>(DEFAULT_SDG_DATA)
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data?.sdgs) {
-          const bgImg = res.data.sdgs.backgroundImage;
-          const bgUrl = typeof bgImg === 'string' ? bgImg : bgImg?.url;
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/homepage/settings')
+        .then(data => {
+          if (data?.sdgs) {
+            const bgImg = data.sdgs.backgroundImage;
+            const bgUrl = typeof bgImg === 'string' ? bgImg : bgImg?.url;
 
-          setSdgContainer({
-            title: res.data.sdgs.title || "Sustainable Development Goals",
-            description: res.data.sdgs.description || "Our work is aligned with the United Nations Sustainable Development Goals...",
-            backgroundImage: bgUrl || "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
-          })
-          if (Array.isArray(res.data.sdgs.goals) && res.data.sdgs.goals.length > 0) {
-            // Map backend goals to match keys or values
-            const mapped = res.data.sdgs.goals.map((g: any, idx: number) => {
-              const iconUrl = typeof g === 'string' ? g : (g?.url || g?.icon?.url);
-              return {
-                id: idx,
-                name: `Goal ${idx + 1}`,
-                color: "#1E3A8A",
-                image: iconUrl || "/home/sdgs/SDG3.jpeg" // Fallback if no icon
-              };
+            setSdgContainer({
+              title: data.sdgs.title || "Sustainable Development Goals",
+              description: data.sdgs.description || "Our work is aligned with the United Nations Sustainable Development Goals...",
+              backgroundImage: bgUrl || "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
             })
-            setGoalsList(mapped)
+            if (Array.isArray(data.sdgs.goals) && data.sdgs.goals.length > 0) {
+              const mapped = data.sdgs.goals.map((g: any, idx: number) => {
+                const iconUrl = typeof g === 'string' ? g : (g?.url || g?.icon?.url);
+                return {
+                  id: idx,
+                  name: `Goal ${idx + 1}`,
+                  color: "#1E3A8A",
+                  image: iconUrl || "/home/sdgs/SDG3.jpeg" // Fallback if no icon
+                };
+              })
+              setGoalsList(mapped)
+            }
           }
-        }
-      })
-      .catch(err => console.error("Error loading SDGs settings:", err))
-      .finally(() => setIsLoading(false))
+        })
+        .catch(err => console.error("Error loading SDGs settings:", err))
+        .finally(() => setIsLoading(false));
+    });
   }, [])
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)

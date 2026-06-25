@@ -1,14 +1,13 @@
 import { Metadata } from 'next';
 import TheatreClient from './TheatreClient';
+import { get } from '@/lib/api';
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/theatre/settings`, { cache: 'no-store' });
-    const json = await res.json();
+    const data = await get<any>('/v1/api/app/theatre/settings', { cache: 'no-store' });
 
-    if (json.success && json.data?.seo) {
-      const seo = json.data.seo;
+    if (data?.seo) {
+      const seo = data.seo;
       const ogImageUrl = typeof seo.ogImage === 'string' ? seo.ogImage : seo.ogImage?.url;
 
       return {

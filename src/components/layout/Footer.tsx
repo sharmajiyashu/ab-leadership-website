@@ -31,23 +31,23 @@ const Footer = () => {
     setMounted(true)
 
     // Fetch Global Settings
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/settings/global`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          // Merge with defaults
-          setSettings((prev: any) => ({
-            headerName: res.data.headerName || prev.headerName,
-            footerText: res.data.footerText || prev.footerText,
-            footerCopyrightText: res.data.footerCopyrightText || prev.footerCopyrightText,
-            footerImage: res.data.footerImage || prev.footerImage,
-            contact: { ...prev.contact, ...res.data.contact },
-            socialLinks: { ...prev.socialLinks, ...res.data.socialLinks }
-          }))
-        }
-      })
-      .catch(err => console.error("Error loading global settings in footer:", err))
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/settings/global')
+        .then(data => {
+          if (data) {
+            // Merge with defaults
+            setSettings((prev: any) => ({
+              headerName: data.headerName || prev.headerName,
+              footerText: data.footerText || prev.footerText,
+              footerCopyrightText: data.footerCopyrightText || prev.footerCopyrightText,
+              footerImage: data.footerImage || prev.footerImage,
+              contact: { ...prev.contact, ...data.contact },
+              socialLinks: { ...prev.socialLinks, ...data.socialLinks }
+            }))
+          }
+        })
+        .catch(err => console.error("Error loading global settings in footer:", err))
+    });
   }, [])
 
   useEffect(() => {

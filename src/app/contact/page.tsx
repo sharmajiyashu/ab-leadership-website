@@ -1,15 +1,12 @@
 import { Metadata } from 'next'
 import ContactClient from './ContactClient'
+import { get } from '@/lib/api'
 
 async function getContactSettings() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/contact/settings`, { 
+    return await get<any>('/v1/api/app/contact/settings', { 
       next: { revalidate: 60 } 
     });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data;
   } catch (error) {
     console.error("Failed to fetch contact settings:", error);
     return null;

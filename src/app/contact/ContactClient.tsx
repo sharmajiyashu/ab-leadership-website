@@ -28,19 +28,19 @@ export default function ContactClient({ initialContactSettings }: { initialConta
   })
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/settings/global`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          setSettings((prev: any) => ({
-            ...prev,
-            contact: { ...prev.contact, ...res.data.contact }
-          }))
-        }
-      })
-      .catch(err => console.error("Error loading global settings in contact:", err))
-  }, [])
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/settings/global')
+        .then(data => {
+          if (data) {
+            setSettings((prev: any) => ({
+              ...prev,
+              contact: { ...prev.contact, ...data.contact }
+            }));
+          }
+        })
+        .catch(err => console.error("Error loading global settings in contact:", err));
+    });
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -60,20 +60,8 @@ export default function ContactClient({ initialContactSettings }: { initialConta
     setSubmitStatus({ type: null, message: '' })
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-      const response = await fetch(`${apiUrl}/v1/api/app/enquiries`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message')
-      }
+      const { post } = await import('@/lib/api');
+      await post('/v1/api/app/enquiries', formData);
 
       // Success
       setSubmitStatus({

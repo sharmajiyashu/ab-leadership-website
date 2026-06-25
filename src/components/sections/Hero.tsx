@@ -27,26 +27,26 @@ const Hero = () => {
   })
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    fetch(`${apiUrl}/v1/api/app/homepage/settings`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          const heroImg = res.data.hero?.image;
-          const heroUrl = typeof heroImg === 'string' ? heroImg : heroImg?.url;
-          setHeroData({
-            title: res.data.hero?.title || "Shaping Wellbeing & Leadership Journeys",
-            description: res.data.hero?.description || "Corporates · Classrooms · Communities · Clinics",
-            image: heroUrl || "/home/hero/IMG_2190.JPG",
-            logosTitle: res.data.logosTitle || "As Featured On",
-            logos: Array.isArray(res.data.logos) && res.data.logos.length > 0 
-              ? res.data.logos.map((logo: any) => typeof logo === 'string' ? logo : logo?.url).filter(Boolean) 
-              : []
-          })
-        }
-      })
-      .catch(err => console.error("Error fetching homepage settings:", err))
-      .finally(() => setIsLoading(false))
+    import('@/lib/api').then(({ get }) => {
+      get<any>('/v1/api/app/homepage/settings')
+        .then(data => {
+          if (data) {
+            const heroImg = data.hero?.image;
+            const heroUrl = typeof heroImg === 'string' ? heroImg : heroImg?.url;
+            setHeroData({
+              title: data.hero?.title || "Shaping Wellbeing & Leadership Journeys",
+              description: data.hero?.description || "Corporates · Classrooms · Communities · Clinics",
+              image: heroUrl || "/home/hero/IMG_2190.JPG",
+              logosTitle: data.logosTitle || "As Featured On",
+              logos: Array.isArray(data.logos) && data.logos.length > 0 
+                ? data.logos.map((logo: any) => typeof logo === 'string' ? logo : logo?.url).filter(Boolean) 
+                : []
+            })
+          }
+        })
+        .catch(err => console.error("Error fetching homepage settings:", err))
+        .finally(() => setIsLoading(false))
+    });
   }, [])
 
   const titleText = heroData.title

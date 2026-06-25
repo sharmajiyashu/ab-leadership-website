@@ -3,16 +3,13 @@ export const revalidate = 60;
 import { Navbar, Footer, BackgroundLayout } from '@/components/layout';
 import Image from 'next/image';
 import Link from 'next/link';
-
 import { Metadata } from 'next';
+
+import { get } from '@/lib/api';
 
 async function getBlogs() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/blogs`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
+    return await get<any>('/v1/api/app/blogs', { next: { revalidate: 60 } });
   } catch (error) {
     console.error("Failed to fetch blogs:", error);
     return [];
@@ -21,11 +18,7 @@ async function getBlogs() {
 
 async function getBlogSettings() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/settings/blog`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data;
+    return await get<any>('/v1/api/app/settings/blog', { next: { revalidate: 60 } });
   } catch (error) {
     console.error("Failed to fetch blog settings:", error);
     return null;

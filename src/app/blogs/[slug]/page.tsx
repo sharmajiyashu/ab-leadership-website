@@ -4,13 +4,11 @@ import { Navbar, Footer, BackgroundLayout } from '@/components/layout';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { get } from '@/lib/api';
+
 async function getBlog(slug: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/blogs/${slug}`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data;
+    return await get<any>(`/v1/api/app/blogs/${slug}`, { next: { revalidate: 60 } });
   } catch (error) {
     console.error("Failed to fetch blog:", error);
     return null;

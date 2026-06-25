@@ -102,27 +102,25 @@ const Navbar = () => {
 
   // Fetch categories and settings dynamically
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    
-    // Fetch Categories
-    fetch(`${apiUrl}/v1/api/app/categories`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          setCategories(res.data)
-        }
-      })
-      .catch(err => console.error("Error loading navbar categories:", err))
+    import('@/lib/api').then(({ get }) => {
+      // Fetch Categories
+      get<any>('/v1/api/app/categories')
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setCategories(data)
+          }
+        })
+        .catch(err => console.error("Error loading navbar categories:", err))
 
-    // Fetch Global Settings
-    fetch(`${apiUrl}/v1/api/app/settings/global`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data?.headerName) {
-          setHeaderName(res.data.headerName)
-        }
-      })
-      .catch(err => console.error("Error loading global settings:", err))
+      // Fetch Global Settings
+      get<any>('/v1/api/app/settings/global')
+        .then(data => {
+          if (data?.headerName) {
+            setHeaderName(data.headerName)
+          }
+        })
+        .catch(err => console.error("Error loading global settings:", err))
+    });
   }, [])
 
   useEffect(() => {

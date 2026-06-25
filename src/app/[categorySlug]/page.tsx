@@ -78,17 +78,15 @@ export default function CategoryDetailPage() {
 
   useEffect(() => {
     if (!categorySlug) return
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
     setLoading(true)
-    fetch(`${apiUrl}/v1/api/app/categories/slug/${categorySlug}`)
-      .then(res => res.json())
-      .then(res => {
-        if (res.success && res.data) {
-          setCategory(res.data)
-        }
-      })
-      .catch(err => console.error("Error fetching category details:", err))
-      .finally(() => setLoading(false))
+    import('@/lib/api').then(({ get }) => {
+      get<CategoryData>(`/v1/api/app/categories/slug/${categorySlug}`)
+        .then(data => {
+          if (data) setCategory(data)
+        })
+        .catch(err => console.error("Error fetching category details:", err))
+        .finally(() => setLoading(false))
+    })
   }, [categorySlug])
 
   // Typewriter effect when category changes

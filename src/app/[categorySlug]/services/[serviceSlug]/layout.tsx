@@ -4,15 +4,14 @@ type Props = {
   params: Promise<{ serviceSlug: string }>
 }
 
+import { get } from '@/lib/api'
+
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
   const { serviceSlug: slug } = await params
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${apiUrl}/v1/api/app/services/slug/${slug}`, { next: { revalidate: 60 } });
-    if (!res.ok) return {};
-    const { data } = await res.json();
+    const data = await get<any>(`/v1/api/app/services/slug/${slug}`, { next: { revalidate: 60 } });
 
     if (data?.seo) {
       const ogImage = typeof data.seo.ogImage === 'string' ? data.seo.ogImage : data.seo.ogImage?.url;
