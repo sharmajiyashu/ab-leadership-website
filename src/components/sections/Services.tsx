@@ -202,18 +202,24 @@ const Services = () => {
           </div>
 
           <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {services.map((service, index) => (
-              <Link
-                key={index}
-                href={service.href}
-                className={`group relative h-[500px] overflow-hidden rounded-xl cursor-pointer block transition-all duration-1000 ${isVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 -translate-y-32'
-                  }`}
-                style={{
-                  transitionDelay: isVisible ? `${index * 200}ms` : '0ms',
-                  transitionTimingFunction: isVisible ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
-                }}
+            {services.map((service, index) => {
+              const categorySlug = service.categoryId?.slug;
+              const targetHref = categorySlug
+                ? (service.slug ? `/${categorySlug}/services/${service.slug}` : `/${categorySlug}`)
+                : service.href;
+
+              return (
+                <Link
+                  key={index}
+                  href={targetHref}
+                  className={`group relative h-[500px] overflow-hidden rounded-xl cursor-pointer block transition-all duration-1000 ${isVisible
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 -translate-y-32'
+                    }`}
+                  style={{
+                    transitionDelay: isVisible ? `${index * 200}ms` : '0ms',
+                    transitionTimingFunction: isVisible ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
+                  }}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
@@ -264,7 +270,7 @@ const Services = () => {
                   </div>
                 </div>
               </Link>
-            ))}
+            )})}
           </div>
         </div>
       </section>

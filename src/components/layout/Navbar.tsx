@@ -5,39 +5,89 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+interface Service {
+  _id: string;
+  title: string;
+  slug: string;
+  href?: string;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  services: Service[];
+}
+
+const fallbackCategories: Category[] = [
+  {
+    _id: 'fallback-corporate',
+    name: 'Corporates',
+    slug: 'corporate',
+    services: [
+      { _id: '1', title: 'Leadership & Employee Development', slug: 'leadership' },
+      { _id: '2', title: 'Wellness & Mental Health', slug: 'wellness' },
+      { _id: '3', title: 'Culture & Organizational Development', slug: 'culture' }
+    ]
+  },
+  {
+    _id: 'fallback-classrooms',
+    name: 'Classrooms',
+    slug: 'classrooms',
+    services: [
+      { _id: '4', title: 'Future Ready Skills', slug: 'future-ready-skills' },
+      { _id: '5', title: 'Mental Health and Wellbeing', slug: 'mental-health' },
+      { _id: '6', title: 'Teacher and Parent Training', slug: 'teacher-training' }
+    ]
+  },
+  {
+    _id: 'fallback-communities',
+    name: 'Communities',
+    slug: 'communities',
+    services: [
+      { _id: '7', title: 'At-Risk Children and Adolescents', slug: 'orphanages' },
+      { _id: '8', title: 'Senior Citizens', slug: 'senior-citizens' },
+      { _id: '9', title: 'Queer Communities', slug: 'queer-communities' }
+    ]
+  },
+  {
+    _id: 'fallback-clinical',
+    name: 'Clinics',
+    slug: 'clinical',
+    services: [
+      { _id: '10', title: 'Children with Special Needs', slug: 'special-needs' },
+      { _id: '11', title: 'Individuals in Psychiatric Care', slug: 'psychiatric-care' },
+      { _id: '12', title: 'Older Adults & Geriatric Care', slug: 'geriatric' }
+    ]
+  }
+];
+
 const Navbar = () => {
   const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isCorporateOpen, setIsCorporateOpen] = useState(false)
-  const [isClassroomsOpen, setIsClassroomsOpen] = useState(false)
-  const [isCommunitiesOpen, setIsCommunitiesOpen] = useState(false)
-  const [isClinicalOpen, setIsClinicalOpen] = useState(false)
-  const corporateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const classroomsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const communitiesTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const clinicalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const corporateCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const classroomsCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const communitiesCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const clinicalCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Dynamic categories state
+  const [categories, setCategories] = useState<Category[]>(fallbackCategories)
+  const [openDropdownSlug, setOpenDropdownSlug] = useState<string | null>(null)
+  
+  const openTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
+  const closeTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
+
   const pathname = usePathname()
   const isHomePage = pathname === '/'
   const isAboutPage = pathname.startsWith('/about')
-  const isCorporatePage = pathname.startsWith('/corporate')
-  const isClassroomsPage = pathname.startsWith('/classrooms')
-  const isClinicalPage = pathname.startsWith('/clinical')
-  const isCommunitiesPage = pathname.startsWith('/communities')
   const isTheatrePage = pathname.startsWith('/theatre')
   const isBlogPage = pathname.startsWith('/blog')
   const isContactPage = pathname.startsWith('/contact')
+
+  // Check if current path matches any category or sub-service
+  const isCategoryActive = categories.some(cat => pathname.startsWith(`/${cat.slug}`))
+
   const shouldBeTransparent =
     isHomePage ||
     isAboutPage ||
-    isCorporatePage ||
-    isClassroomsPage ||
-    isClinicalPage ||
-    isCommunitiesPage ||
+    isCategoryActive ||
     isTheatrePage ||
     isBlogPage ||
     isContactPage
@@ -47,17 +97,26 @@ const Navbar = () => {
     setMounted(true)
   }, [])
 
+  // Fetch categories dynamically
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    fetch(`${apiUrl}/v1/api/app/categories`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setCategories(res.data)
+        }
+      })
+      .catch(err => console.error("Error loading navbar categories:", err))
+  }, [])
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
-      // Simple, reliable scroll detection: show navbar background after any scroll
-      // This eliminates issues with hero height calculations and scroll containers
       setIsScrolled(scrollTop > 10)
     }
 
-    // Check initial scroll position
     handleScroll()
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', handleScroll)
@@ -66,15 +125,11 @@ const Navbar = () => {
 
   // Cleanup timeouts on unmount
   useEffect(() => {
+    const refsOpen = openTimeoutRefs.current;
+    const refsClose = closeTimeoutRefs.current;
     return () => {
-      if (corporateTimeoutRef.current) clearTimeout(corporateTimeoutRef.current)
-      if (classroomsTimeoutRef.current) clearTimeout(classroomsTimeoutRef.current)
-      if (communitiesTimeoutRef.current) clearTimeout(communitiesTimeoutRef.current)
-      if (clinicalTimeoutRef.current) clearTimeout(clinicalTimeoutRef.current)
-      if (corporateCloseTimeoutRef.current) clearTimeout(corporateCloseTimeoutRef.current)
-      if (classroomsCloseTimeoutRef.current) clearTimeout(classroomsCloseTimeoutRef.current)
-      if (communitiesCloseTimeoutRef.current) clearTimeout(communitiesCloseTimeoutRef.current)
-      if (clinicalCloseTimeoutRef.current) clearTimeout(clinicalCloseTimeoutRef.current)
+      Object.values(refsOpen).forEach(clearTimeout)
+      Object.values(refsClose).forEach(clearTimeout)
     }
   }, [])
 
@@ -84,28 +139,47 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsOpen(false)
-    setIsCorporateOpen(false)
-    setIsClassroomsOpen(false)
-    setIsCommunitiesOpen(false)
-    setIsClinicalOpen(false)
-    // Clear all timeouts (both open and close)
-    if (corporateTimeoutRef.current) { clearTimeout(corporateTimeoutRef.current); corporateTimeoutRef.current = null }
-    if (classroomsTimeoutRef.current) { clearTimeout(classroomsTimeoutRef.current); classroomsTimeoutRef.current = null }
-    if (communitiesTimeoutRef.current) { clearTimeout(communitiesTimeoutRef.current); communitiesTimeoutRef.current = null }
-    if (clinicalTimeoutRef.current) { clearTimeout(clinicalTimeoutRef.current); clinicalTimeoutRef.current = null }
-    if (corporateCloseTimeoutRef.current) { clearTimeout(corporateCloseTimeoutRef.current); corporateCloseTimeoutRef.current = null }
-    if (classroomsCloseTimeoutRef.current) { clearTimeout(classroomsCloseTimeoutRef.current); classroomsCloseTimeoutRef.current = null }
-    if (communitiesCloseTimeoutRef.current) { clearTimeout(communitiesCloseTimeoutRef.current); communitiesCloseTimeoutRef.current = null }
-    if (clinicalCloseTimeoutRef.current) { clearTimeout(clinicalCloseTimeoutRef.current); clinicalCloseTimeoutRef.current = null }
+    setOpenDropdownSlug(null)
+    Object.values(openTimeoutRefs.current).forEach(clearTimeout)
+    Object.values(closeTimeoutRefs.current).forEach(clearTimeout)
+    openTimeoutRefs.current = {}
+    closeTimeoutRefs.current = {}
   }
 
-  // Determine if navbar should be transparent
-  // Always show background only after scrolling to ensure visibility
+  const handleMouseEnter = (slug: string) => {
+    if (closeTimeoutRefs.current[slug]) {
+      clearTimeout(closeTimeoutRefs.current[slug])
+      delete closeTimeoutRefs.current[slug]
+    }
+    
+    // Clear other pending opens
+    Object.keys(openTimeoutRefs.current).forEach(s => {
+      if (s !== slug) {
+        clearTimeout(openTimeoutRefs.current[s])
+        delete openTimeoutRefs.current[s]
+      }
+    })
+
+    openTimeoutRefs.current[slug] = setTimeout(() => {
+      setOpenDropdownSlug(slug)
+    }, 300)
+  }
+
+  const handleMouseLeave = (slug: string) => {
+    if (openTimeoutRefs.current[slug]) {
+      clearTimeout(openTimeoutRefs.current[slug])
+      delete openTimeoutRefs.current[slug]
+    }
+
+    closeTimeoutRefs.current[slug] = setTimeout(() => {
+      setOpenDropdownSlug(prev => (prev === slug ? null : prev))
+    }, 200)
+  }
+
   const isTransparent = shouldBeTransparent && !isScrolled
   const showBackgroundImage = shouldBeTransparent && !isTransparent
   const textColor = isTransparent ? 'text-white' : showBackgroundImage ? 'text-gray-900' : isScrolled ? 'text-white' : 'text-gray-900'
   const bgClass = isTransparent ? 'bg-transparent' : showBackgroundImage ? '' : isScrolled ? 'bg-black shadow-lg' : 'bg-white shadow-md'
-  // When at the top (transparent or background image), use a subtle translucent hover instead of solid black.
   const linkHoverClass = shouldBeTransparent ? 'hover:bg-black/10' : isScrolled ? 'hover:bg-white hover:text-black' : 'hover:bg-black hover:text-white'
   const dropdownPanelClass = showBackgroundImage ? 'bg-white/95 border-gray-200' : isScrolled ? 'bg-black/95 border-gray-700' : 'bg-white/95 border-gray-200'
   const dropdownLinkText = showBackgroundImage ? 'text-gray-700' : isScrolled ? 'text-white' : 'text-gray-700'
@@ -140,238 +214,52 @@ const Navbar = () => {
             </Link>
 
             {/* Services (4Cs) Dropdown */}
-              <div className="relative group">
-                <div 
-                  className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}
-                  onClick={(e) => e.preventDefault()}
-                  onMouseDown={(e) => e.preventDefault()}
-                >
-                  Services
-                  <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <div className={`absolute left-0 mt-3 w-56 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-10`}>
-                  <div className="py-1.5">
-                    {/* Corporate with nested dropdown */}
-                    <div 
-                      className="relative"
-                      onMouseEnter={() => {
-                        // Clear close timeout if re-entering
-                        if (corporateCloseTimeoutRef.current) {
-                          clearTimeout(corporateCloseTimeoutRef.current)
-                          corporateCloseTimeoutRef.current = null
-                        }
-                        // Clear other dropdowns immediately
-                        setIsClassroomsOpen(false)
-                        setIsCommunitiesOpen(false)
-                        setIsClinicalOpen(false)
-                        // Clear any existing open timeout
-                        if (corporateTimeoutRef.current) {
-                          clearTimeout(corporateTimeoutRef.current)
-                        }
-                        // Set new timeout - only opens if cursor stays for 400ms
-                        corporateTimeoutRef.current = setTimeout(() => {
-                          setIsCorporateOpen(true)
-                        }, 400)
-                      }}
-                      onMouseLeave={() => {
-                        // Clear open timeout if mouse leaves before delay completes
-                        if (corporateTimeoutRef.current) {
-                          clearTimeout(corporateTimeoutRef.current)
-                          corporateTimeoutRef.current = null
-                        }
-                        // Add closing delay for better UX (200ms grace period)
-                        corporateCloseTimeoutRef.current = setTimeout(() => {
-                          setIsCorporateOpen(false)
-                        }, 200)
-                      }}
-                    >
-                      <Link href="/corporate" className={`flex items-center justify-between px-4 py-2.5 text-[15px] ${dropdownLinkText} ${linkHoverClass} transition-all duration-300 ease-out font-bricolage-text group/item leading-[1.7] cursor-pointer`}>
-                        <span>Corporates</span>
-                        <span className={`ml-2 ${dropdownArrowColor} transition-colors duration-300`}>→</span>
-                      </Link>
-                      {isCorporateOpen && (
-                        <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
-                          <div className="py-1.5">
-                            <Link href="/corporate/services/leadership" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Leadership & Employee Development
-                            </Link>
-                            <Link href="/corporate/services/wellness" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Wellness & Mental Health
-                            </Link>
-                            <Link href="/corporate/services/culture" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Culture & Organizational Development
-                    </Link>
+            <div className="relative group">
+              <div 
+                className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}
+                onClick={(e) => e.preventDefault()}
+              >
+                Services
+                <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <div className={`absolute left-0 mt-3 w-56 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out z-10`}>
+                <div className="py-1.5">
+                  {categories.map((category) => {
+                    const isDropdownOpen = openDropdownSlug === category.slug;
+                    return (
+                      <div 
+                        key={category._id}
+                        className="relative"
+                        onMouseEnter={() => handleMouseEnter(category.slug)}
+                        onMouseLeave={() => handleMouseLeave(category.slug)}
+                      >
+                        <Link href={`/${category.slug}`} className={`flex items-center justify-between px-4 py-2.5 text-[15px] ${dropdownLinkText} ${linkHoverClass} transition-all duration-300 ease-out font-bricolage-text group/item leading-[1.7] cursor-pointer`}>
+                          <span>{category.name}</span>
+                          <span className={`ml-2 ${dropdownArrowColor} transition-colors duration-300`}>→</span>
+                        </Link>
+                        {isDropdownOpen && category.services && category.services.length > 0 && (
+                          <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
+                            <div className="py-1.5">
+                              {category.services.map((service) => (
+                                <Link 
+                                  key={service._id}
+                                  href={service.href || `/${category.slug}/services/${service.slug}`} 
+                                  className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}
+                                >
+                                  {service.title}
+                                </Link>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                    {/* Classrooms with nested dropdown */}
-                    <div 
-                      className="relative"
-                      onMouseEnter={() => {
-                        // Clear close timeout if re-entering
-                        if (classroomsCloseTimeoutRef.current) {
-                          clearTimeout(classroomsCloseTimeoutRef.current)
-                          classroomsCloseTimeoutRef.current = null
-                        }
-                        // Clear other dropdowns immediately
-                        setIsCorporateOpen(false)
-                        setIsCommunitiesOpen(false)
-                        setIsClinicalOpen(false)
-                        // Clear any existing open timeout
-                        if (classroomsTimeoutRef.current) {
-                          clearTimeout(classroomsTimeoutRef.current)
-                        }
-                        // Set new timeout - only opens if cursor stays for 400ms
-                        classroomsTimeoutRef.current = setTimeout(() => {
-                          setIsClassroomsOpen(true)
-                        }, 400)
-                      }}
-                      onMouseLeave={() => {
-                        // Clear open timeout if mouse leaves before delay completes
-                        if (classroomsTimeoutRef.current) {
-                          clearTimeout(classroomsTimeoutRef.current)
-                          classroomsTimeoutRef.current = null
-                        }
-                        // Add closing delay for better UX (200ms grace period)
-                        classroomsCloseTimeoutRef.current = setTimeout(() => {
-                          setIsClassroomsOpen(false)
-                        }, 200)
-                      }}
-                    >
-                      <Link href="/classrooms" className={`flex items-center justify-between px-4 py-2.5 text-[15px] ${dropdownLinkText} ${linkHoverClass} transition-all duration-300 ease-out font-bricolage-text group/item leading-[1.7] cursor-pointer`}>
-                        <span>Classrooms</span>
-                        <span className={`ml-2 ${dropdownArrowColor} transition-colors duration-300`}>→</span>
-                      </Link>
-                      {isClassroomsOpen && (
-                        <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
-                          <div className="py-1.5">
-                            <Link href="/classrooms/services/future-ready-skills" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Future Ready Skills
-                            </Link>
-                            <Link href="/classrooms/services/mental-health" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Mental Health and Wellbeing
-                            </Link>
-                            <Link href="/classrooms/services/teacher-training" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Teacher and Parent Training
-                    </Link>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {/* Communities with nested dropdown */}
-                    <div 
-                      className="relative"
-                      onMouseEnter={() => {
-                        // Clear close timeout if re-entering
-                        if (communitiesCloseTimeoutRef.current) {
-                          clearTimeout(communitiesCloseTimeoutRef.current)
-                          communitiesCloseTimeoutRef.current = null
-                        }
-                        // Clear other dropdowns immediately
-                        setIsCorporateOpen(false)
-                        setIsClassroomsOpen(false)
-                        setIsClinicalOpen(false)
-                        // Clear any existing open timeout
-                        if (communitiesTimeoutRef.current) {
-                          clearTimeout(communitiesTimeoutRef.current)
-                        }
-                        // Set new timeout - only opens if cursor stays for 400ms
-                        communitiesTimeoutRef.current = setTimeout(() => {
-                          setIsCommunitiesOpen(true)
-                        }, 400)
-                      }}
-                      onMouseLeave={() => {
-                        // Clear open timeout if mouse leaves before delay completes
-                        if (communitiesTimeoutRef.current) {
-                          clearTimeout(communitiesTimeoutRef.current)
-                          communitiesTimeoutRef.current = null
-                        }
-                        // Add closing delay for better UX (200ms grace period)
-                        communitiesCloseTimeoutRef.current = setTimeout(() => {
-                          setIsCommunitiesOpen(false)
-                        }, 200)
-                      }}
-                    >
-                      <Link href="/communities" className={`flex items-center justify-between px-4 py-2.5 text-[15px] ${dropdownLinkText} ${linkHoverClass} transition-all duration-300 ease-out font-bricolage-text group/item leading-[1.7] cursor-pointer`}>
-                        <span>Communities</span>
-                        <span className={`ml-2 ${dropdownArrowColor} transition-colors duration-300`}>→</span>
-                      </Link>
-                      {isCommunitiesOpen && (
-                        <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
-                          <div className="py-1.5">
-                            <Link href="/communities/services/orphanages" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              At-Risk Children and Adolescents
-                            </Link>
-                            <Link href="/communities/services/senior-citizens" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Senior Citizens
-                            </Link>
-                            <Link href="/communities/services/queer-communities" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Queer Communities
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {/* Clinical with nested dropdown */}
-                    <div 
-                      className="relative"
-                      onMouseEnter={() => {
-                        // Clear close timeout if re-entering
-                        if (clinicalCloseTimeoutRef.current) {
-                          clearTimeout(clinicalCloseTimeoutRef.current)
-                          clinicalCloseTimeoutRef.current = null
-                        }
-                        // Clear other dropdowns immediately
-                        setIsCorporateOpen(false)
-                        setIsClassroomsOpen(false)
-                        setIsCommunitiesOpen(false)
-                        // Clear any existing open timeout
-                        if (clinicalTimeoutRef.current) {
-                          clearTimeout(clinicalTimeoutRef.current)
-                        }
-                        // Set new timeout - only opens if cursor stays for 400ms
-                        clinicalTimeoutRef.current = setTimeout(() => {
-                          setIsClinicalOpen(true)
-                        }, 400)
-                      }}
-                      onMouseLeave={() => {
-                        // Clear open timeout if mouse leaves before delay completes
-                        if (clinicalTimeoutRef.current) {
-                          clearTimeout(clinicalTimeoutRef.current)
-                          clinicalTimeoutRef.current = null
-                        }
-                        // Add closing delay for better UX (200ms grace period)
-                        clinicalCloseTimeoutRef.current = setTimeout(() => {
-                          setIsClinicalOpen(false)
-                        }, 200)
-                      }}
-                    >
-                      <Link href="/clinical" className={`flex items-center justify-between px-4 py-2.5 text-[15px] ${dropdownLinkText} ${linkHoverClass} transition-all duration-300 ease-out font-bricolage-text group/item leading-[1.7] cursor-pointer`}>
-                        <span>Clinics</span>
-                        <span className={`ml-2 ${dropdownArrowColor} transition-colors duration-300`}>→</span>
-                      </Link>
-                      {isClinicalOpen && (
-                        <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
-                          <div className="py-1.5">
-                            <Link href="/clinical/services/special-needs" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Children with Special Needs
-                            </Link>
-                            <Link href="/clinical/services/psychiatric-care" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Individuals in Psychiatric Care
-                            </Link>
-                            <Link href="/clinical/services/geriatric" className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}>
-                              Older Adults & Geriatric Care
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            </div>
           </div>
 
           {/* Center: name (absolutely centered in navbar) */}
@@ -427,104 +315,40 @@ const Navbar = () => {
             {/* Mobile Services Dropdown */}
             <div>
               <div className={`flex items-center justify-between w-full px-3 py-2 text-lg font-medium ${mobileLinkText} cursor-default`}>
-                Services (4Cs)
+                Services
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
               <div className="pl-4 space-y-1">
-                {/* Corporate with nested dropdown */}
-                <div>
-                  <div 
-                    className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
-                    onClick={() => setIsCorporateOpen(!isCorporateOpen)}
-                  >
-                    <span className="leading-[1.7]">Corporates</span>
-                    <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isCorporateOpen ? 'rotate-90' : ''}`}>→</span>
-                  </div>
-                  {isCorporateOpen && (
-                    <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
-                      <Link href="/corporate/services/leadership" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Leadership & Employee Development
-                      </Link>
-                      <Link href="/corporate/services/wellness" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Wellness & Mental Health
-                      </Link>
-                      <Link href="/corporate/services/culture" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Culture & Organizational Development
-                </Link>
+                {categories.map((category) => {
+                  const isMobileSubOpen = openDropdownSlug === category.slug;
+                  return (
+                    <div key={category._id}>
+                      <div 
+                        className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
+                        onClick={() => setOpenDropdownSlug(isMobileSubOpen ? null : category.slug)}
+                      >
+                        <span className="leading-[1.7]">{category.name}</span>
+                        <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isMobileSubOpen ? 'rotate-90' : ''}`}>→</span>
+                      </div>
+                      {isMobileSubOpen && category.services && category.services.length > 0 && (
+                        <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
+                          {category.services.map((service) => (
+                            <Link 
+                              key={service._id}
+                              href={service.href || `/${category.slug}/services/${service.slug}`} 
+                              onClick={closeMenu} 
+                              className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}
+                            >
+                              {service.title}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                {/* Classrooms with nested dropdown */}
-                <div>
-                  <div 
-                    className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
-                    onClick={() => setIsClassroomsOpen(!isClassroomsOpen)}
-                  >
-                    <span className="leading-[1.7]">Classrooms</span>
-                    <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isClassroomsOpen ? 'rotate-90' : ''}`}>→</span>
-                  </div>
-                  {isClassroomsOpen && (
-                    <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
-                      <Link href="/future-ready-skills" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Future Ready Skills
-                      </Link>
-                      <Link href="/mental-health" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Mental Health and Wellbeing
-                      </Link>
-                      <Link href="/teacher-training" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Teacher and Parent Training
-                </Link>
-                    </div>
-                  )}
-                </div>
-                {/* Communities with nested dropdown */}
-                <div>
-                  <div 
-                    className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
-                    onClick={() => setIsCommunitiesOpen(!isCommunitiesOpen)}
-                  >
-                    <span className="leading-[1.7]">Communities</span>
-                    <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isCommunitiesOpen ? 'rotate-90' : ''}`}>→</span>
-                  </div>
-                  {isCommunitiesOpen && (
-                    <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
-                      <Link href="/communities/services/orphanages" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        At-Risk Children and Adolescents
-                      </Link>
-                      <Link href="/communities/services/senior-citizens" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Senior Citizens
-                      </Link>
-                      <Link href="/communities/services/queer-communities" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Queer Communities
-                      </Link>
-                    </div>
-                  )}
-                </div>
-                {/* Clinical with nested dropdown */}
-                <div>
-                  <div 
-                    className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
-                    onClick={() => setIsClinicalOpen(!isClinicalOpen)}
-                  >
-                    <span className="leading-[1.7]">Clinics</span>
-                    <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isClinicalOpen ? 'rotate-90' : ''}`}>→</span>
-                  </div>
-                  {isClinicalOpen && (
-                    <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
-                      <Link href="/clinical/services/special-needs" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Children with Special Needs
-                      </Link>
-                      <Link href="/clinical/services/psychiatric-care" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Individuals in Psychiatric Care
-                      </Link>
-                      <Link href="/clinical/services/geriatric" onClick={closeMenu} className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}>
-                        Older Adults & Geriatric Care
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -545,12 +369,9 @@ const Navbar = () => {
     </nav>
   )
 
-  // Render navbar via portal to document.body to escape transformed parent containers
-  // This ensures fixed positioning works correctly even when parent has transform
   if (!mounted) return null
   
   return createPortal(navbarContent, document.body)
 }
 
 export default Navbar
-
