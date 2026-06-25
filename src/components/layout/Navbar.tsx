@@ -71,6 +71,9 @@ const Navbar = () => {
   const [categories, setCategories] = useState<Category[]>(fallbackCategories)
   const [openDropdownSlug, setOpenDropdownSlug] = useState<string | null>(null)
   
+  // Global settings state
+  const [headerName, setHeaderName] = useState("Abhishek Banerji")
+  
   const openTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
   const closeTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
 
@@ -97,9 +100,11 @@ const Navbar = () => {
     setMounted(true)
   }, [])
 
-  // Fetch categories dynamically
+  // Fetch categories and settings dynamically
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    
+    // Fetch Categories
     fetch(`${apiUrl}/v1/api/app/categories`)
       .then(res => res.json())
       .then(res => {
@@ -108,6 +113,16 @@ const Navbar = () => {
         }
       })
       .catch(err => console.error("Error loading navbar categories:", err))
+
+    // Fetch Global Settings
+    fetch(`${apiUrl}/v1/api/app/settings/global`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data?.headerName) {
+          setHeaderName(res.data.headerName)
+        }
+      })
+      .catch(err => console.error("Error loading global settings:", err))
   }, [])
 
   useEffect(() => {
@@ -265,7 +280,7 @@ const Navbar = () => {
           {/* Center: name (absolutely centered in navbar) */}
           <div className="hidden lg:flex absolute left-1/2 top-0 h-16 lg:h-20 -translate-x-1/2 items-center justify-center pointer-events-none">
             <Link href="/" className={`pointer-events-auto ${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-xl sm:text-2xl lg:text-3xl font-normal font-lovelace whitespace-nowrap cursor-pointer`}>
-              Abhishek Banerji
+              {headerName}
             </Link>
           </div>
 
