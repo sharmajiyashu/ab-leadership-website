@@ -81,7 +81,7 @@ const Navbar = () => {
   const isHomePage = pathname === '/'
   const isAboutPage = pathname.startsWith('/about')
   const isTheatrePage = pathname.startsWith('/theatre')
-  const isBlogPage = pathname.startsWith('/blog')
+  const isBlogPage = pathname.startsWith('/blogs')
   const isContactPage = pathname.startsWith('/contact')
 
   // Check if current path matches any category or sub-service
@@ -289,8 +289,8 @@ const Navbar = () => {
             <Link href="/theatre" className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}>
               Theatre
             </Link>
-            <Link href="/blog" className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}>
-              Blog
+            <Link href="/blogs" className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}>
+              Blogs
             </Link>
             <Link href="/contact" className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}>
               Contact
@@ -371,8 +371,8 @@ const Navbar = () => {
               Theatre
             </Link>
 
-            <Link href="/blog" onClick={closeMenu} className={`block px-3 py-2 text-lg font-medium ${mobileLinkText} ${linkHoverClass} rounded-md transition-colors cursor-pointer`}>
-              Blog
+            <Link href="/blogs" onClick={closeMenu} className={`block px-3 py-2 text-lg font-medium ${mobileLinkText} ${linkHoverClass} rounded-md transition-colors cursor-pointer`}>
+              Blogs
             </Link>
 
             <Link href="/contact" onClick={closeMenu} className={`block px-3 py-2 text-lg font-medium ${mobileLinkText} ${linkHoverClass} rounded-md transition-colors cursor-pointer`}>
