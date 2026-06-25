@@ -4,7 +4,10 @@ import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Image from 'next/image'
 import Slider from 'react-infinite-logo-slider'
 import { useState, useEffect } from 'react'
+import { Loader } from '@/components/ui/Loader'
+
 const Hero = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [displayedText, setDisplayedText] = useState('')
   const [isTypingComplete, setIsTypingComplete] = useState(false)
   const [subtitleOpacity, setSubtitleOpacity] = useState(0)
@@ -43,6 +46,7 @@ const Hero = () => {
         }
       })
       .catch(err => console.error("Error fetching homepage settings:", err))
+      .finally(() => setIsLoading(false))
   }, [])
 
   const titleText = heroData.title
@@ -89,6 +93,10 @@ const Hero = () => {
       return () => clearTimeout(timer)
     }
   }, [isTypingComplete])
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <section className="pb-4">

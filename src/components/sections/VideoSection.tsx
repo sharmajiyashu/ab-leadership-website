@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { Loader } from '@/components/ui/Loader'
 
 const VideoSection = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [isVideoVisible, setIsVideoVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
@@ -135,6 +137,7 @@ const VideoSection = () => {
         }
       })
       .catch(err => console.error("Error loading video section:", err))
+      .finally(() => setIsLoading(false))
   }, [])
 
   const paragraphs = Array.isArray(videoData.paragraphs) && videoData.paragraphs.length > 0
@@ -189,6 +192,10 @@ const VideoSection = () => {
   const textOpacity = Math.min(1, textProgress * 1.5)
   const textTranslateY = (1 - textProgress) * 60 // More dramatic text movement
   const textScale = 0.95 + (textProgress * 0.05) // Subtle scale effect for text
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <section ref={sectionRef} className="relative px-32 py-4">

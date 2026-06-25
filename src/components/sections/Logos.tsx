@@ -3,6 +3,7 @@
 import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
+import { Loader } from '@/components/ui/Loader'
 
 const DEFAULT_LOGO_TABS = [
   { id: 'corporates', label: 'Corporates', src: '/home/logo/corporates.png', alt: 'Proud to work with – Corporates' },
@@ -12,6 +13,7 @@ const DEFAULT_LOGO_TABS = [
 ]
 
 const Logos = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [partnersInfo, setPartnersInfo] = useState({
     title: "Proud to work with",
     description: "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
@@ -55,7 +57,8 @@ const Logos = () => {
           }
         }
       })
-      .catch(err => console.error("Error loading categories for logos:", err));
+      .catch(err => console.error("Error loading categories for logos:", err))
+      .finally(() => setIsLoading(false));
   }, [])
 
   const LOGO_TABS = logoTabs;
@@ -161,6 +164,10 @@ const Logos = () => {
   const imageOpacity = Math.min(1, textProgress * 1.5)
   const imageTranslateY = (1 - textProgress) * 60
   const imageScale = 1.0 + (textProgress * 0.05) // Reduced scale for less zoom
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <section ref={sectionRef} className="pt-4 pb-12">

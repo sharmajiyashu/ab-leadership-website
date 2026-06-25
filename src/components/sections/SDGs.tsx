@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import SectionHeading from './SectionHeading'
+import { Loader } from '@/components/ui/Loader'
 
 // Default SDG data with official colors, names, and image paths
 const DEFAULT_SDG_DATA = [
@@ -45,6 +46,7 @@ const DEFAULT_SDG_DATA = [
 ]
 
 const SDGs = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [sdgContainer, setSdgContainer] = useState({
     title: "Sustainable Development Goals",
     description: "Our work is aligned with the United Nations Sustainable Development Goals, contributing to a more equitable, healthy, and sustainable world.",
@@ -82,6 +84,7 @@ const SDGs = () => {
         }
       })
       .catch(err => console.error("Error loading SDGs settings:", err))
+      .finally(() => setIsLoading(false))
   }, [])
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
@@ -192,6 +195,10 @@ const SDGs = () => {
   const textOpacity = Math.min(1, textProgress * 1.5)
   const textTranslateY = (1 - textProgress) * 60
   const textScale = 0.95 + (textProgress * 0.05)
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <section ref={sectionRef} className="relative pt-4 pb-4 px-4 md:px-0 overflow-hidden min-h-[584px] flex flex-col justify-center">

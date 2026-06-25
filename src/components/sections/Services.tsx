@@ -4,8 +4,10 @@ import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import SectionHeading from './SectionHeading'
+import { Loader } from '@/components/ui/Loader'
 
 const Services = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -69,6 +71,7 @@ const Services = () => {
         }
       })
       .catch(err => console.error("Error loading services:", err))
+      .finally(() => setIsLoading(false))
   }, [])
 
   const services = servicesList;
@@ -179,6 +182,10 @@ const Services = () => {
   const textOpacity = Math.min(1, textProgress * 1.5)
   const textTranslateY = (1 - textProgress) * 60 // More dramatic text movement
   const textScale = 0.95 + (textProgress * 0.05) // Subtle scale effect for text
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <>

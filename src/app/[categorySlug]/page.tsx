@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { ArrowUpRightIcon } from '@/components/icons/ArrowUpRightIcon'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { Loader } from '@/components/ui/Loader'
 
 interface Service {
   _id: string;
@@ -141,8 +142,8 @@ export default function CategoryDetailPage() {
     return (
       <BackgroundLayout>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-transparent">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <div className="min-h-screen flex items-center justify-center pt-20">
+          <Loader />
         </div>
         <Footer />
       </BackgroundLayout>
