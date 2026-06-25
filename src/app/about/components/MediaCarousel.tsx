@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import SectionHeading from '@/components/sections/SectionHeading';
 
-const mediaImages = [
+const DEFAULT_MEDIA_IMAGES = [
   '/aboutMe/media/1.jpg',
   '/aboutMe/media/2.jpg',
   '/aboutMe/media/3.jpg',
@@ -39,13 +39,19 @@ const mediaImages = [
 
 const VISIBLE_COUNT = 4;
 
-export default function MediaCarousel() {
+interface MediaCarouselProps {
+  images?: string[];
+}
+
+export default function MediaCarousel({ images }: MediaCarouselProps) {
+  if (!images || images.length === 0) return null;
+  const carouselImages = images;
   const visibleCount = VISIBLE_COUNT;
-  const totalImages = mediaImages.length;
-  
+  const totalImages = carouselImages.length;
+
   // Triple the images for seamless infinite loop
-  const extendedImages = [...mediaImages, ...mediaImages, ...mediaImages];
-  
+  const extendedImages = [...carouselImages, ...carouselImages, ...carouselImages];
+
   // Start at the middle set
   const [currentIndex, setCurrentIndex] = useState(totalImages);
   const [isPaused, setIsPaused] = useState(false);
@@ -68,7 +74,7 @@ export default function MediaCarousel() {
   // Handle seamless loop reset
   useEffect(() => {
     if (!isTransitioning) return;
-    
+
     const handleTransitionEnd = () => {
       // If we've scrolled past the last set, jump to the middle set
       if (currentIndex >= totalImages * 2) {
@@ -176,7 +182,7 @@ export default function MediaCarousel() {
                     className="relative flex-shrink-0 px-2 md:px-3"
                     style={{ width: `${slidePercentage}%` }}
                   >
-                    <div 
+                    <div
                       className="group relative aspect-square overflow-hidden rounded-xl shadow-lg bg-neutral-100 cursor-pointer border border-gray-200 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:-translate-y-3 hover:shadow-2xl hover:z-10"
                       onClick={() => setSelectedImage(getOriginalIndex(index))}
                     >
@@ -215,11 +221,10 @@ export default function MediaCarousel() {
                   setIsTransitioning(true);
                   setCurrentIndex(totalImages + index);
                 }}
-                className={`h-2.5 rounded-full transition-all duration-500 ease-out ${
-                  getOriginalIndex(currentIndex) === index
-                    ? 'bg-[#0047AB] w-10'
-                    : 'bg-gray-300 hover:bg-gray-400 w-2.5'
-                }`}
+                className={`h-2.5 rounded-full transition-all duration-500 ease-out ${getOriginalIndex(currentIndex) === index
+                  ? 'bg-[#0047AB] w-10'
+                  : 'bg-gray-300 hover:bg-gray-400 w-2.5'
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -231,9 +236,9 @@ export default function MediaCarousel() {
       {mounted && selectedImage !== null && createPortal(
         <div
           className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center"
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             opacity: isLightboxOpen ? 1 : 0,
             transition: 'opacity 0.3s ease-out'
@@ -262,8 +267,8 @@ export default function MediaCarousel() {
           {/* Image container */}
           <div
             className="relative flex items-center justify-center"
-            style={{ 
-              maxWidth: '95vw', 
+            style={{
+              maxWidth: '95vw',
               maxHeight: '95vh',
               opacity: isLightboxOpen ? 1 : 0,
               transform: isLightboxOpen ? 'scale(1)' : 'scale(0.95)',
@@ -272,7 +277,7 @@ export default function MediaCarousel() {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={mediaImages[selectedImage]}
+              src={carouselImages[selectedImage]}
               alt={`Media coverage ${selectedImage + 1}`}
               width={1600}
               height={1200}
@@ -286,7 +291,7 @@ export default function MediaCarousel() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedImage((selectedImage - 1 + mediaImages.length) % mediaImages.length);
+              setSelectedImage((selectedImage - 1 + carouselImages.length) % carouselImages.length);
             }}
             className="fixed left-6 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition"
             style={{
@@ -305,7 +310,7 @@ export default function MediaCarousel() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedImage((selectedImage + 1) % mediaImages.length);
+              setSelectedImage((selectedImage + 1) % carouselImages.length);
             }}
             className="fixed right-6 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition"
             style={{

@@ -3,16 +3,18 @@
 import Image from 'next/image';
 
 interface HeroSectionProps {
-  imageSrc: string;
-  imageAlt: string;
+  imageSrc?: string;
+  imageAlt?: string;
 }
 
 export default function HeroSection({ imageSrc, imageAlt }: HeroSectionProps) {
+  if (!imageSrc) return null;
+
   return (
     <section className="relative w-full h-[400px] md:h-[550px] lg:h-[750px] overflow-hidden">
       <Image
         src={imageSrc}
-        alt={imageAlt}
+        alt={imageAlt || "Hero Image"}
         fill
         className="object-cover"
         style={{ objectPosition: 'center 0%' }}

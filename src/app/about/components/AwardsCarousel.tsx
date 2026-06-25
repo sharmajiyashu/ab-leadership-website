@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import SectionHeading from '@/components/sections/SectionHeading';
 
-const awardImages = [
+const DEFAULT_AWARD_IMAGES = [
   '/aboutMe/awards/1.jpg',
   '/aboutMe/awards/2.JPG',
   '/aboutMe/awards/2 yuva.jpg',
@@ -28,13 +28,19 @@ const awardImages = [
   '/aboutMe/awards/That deliberate, conscious choice — to work with people, for people, often despite the system —.jpg',
 ];
 
-export default function AwardsCarousel() {
+interface AwardsCarouselProps {
+  images?: string[];
+}
+
+export default function AwardsCarousel({ images }: AwardsCarouselProps) {
+  if (!images || images.length === 0) return null;
+  const awardImages = images;
   const visibleCount = 4;
   const totalImages = awardImages.length;
-  
+
   // Triple the images for seamless infinite loop
   const extendedImages = [...awardImages, ...awardImages, ...awardImages];
-  
+
   // Start on last slide (still inside middle third for infinite loop)
   const [currentIndex, setCurrentIndex] = useState(2 * totalImages - 1);
   const [isPaused, setIsPaused] = useState(false);
@@ -57,7 +63,7 @@ export default function AwardsCarousel() {
   // Handle seamless loop reset
   useEffect(() => {
     if (!isTransitioning) return;
-    
+
     const handleTransitionEnd = () => {
       // If we've scrolled past the last set, jump to the middle set
       if (currentIndex >= totalImages * 2) {
@@ -165,7 +171,7 @@ export default function AwardsCarousel() {
                     className="relative flex-shrink-0 px-2 md:px-3"
                     style={{ width: `${slidePercentage}%` }}
                   >
-                    <div 
+                    <div
                       className="group relative aspect-square overflow-hidden rounded-xl shadow-lg bg-gray-100 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-105 hover:-translate-y-3 hover:shadow-2xl hover:z-10"
                       onClick={() => setSelectedImage(getOriginalIndex(index))}
                     >
@@ -204,11 +210,10 @@ export default function AwardsCarousel() {
                   setIsTransitioning(true);
                   setCurrentIndex(totalImages + index);
                 }}
-                className={`h-2.5 rounded-full transition-all duration-500 ease-out ${
-                  getOriginalIndex(currentIndex) === index
+                className={`h-2.5 rounded-full transition-all duration-500 ease-out ${getOriginalIndex(currentIndex) === index
                     ? 'bg-[#0047AB] w-10'
                     : 'bg-gray-300 hover:bg-gray-400 w-2.5'
-                }`}
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -220,9 +225,9 @@ export default function AwardsCarousel() {
       {mounted && selectedImage !== null && createPortal(
         <div
           className="fixed inset-0 z-[999] bg-black/90 flex items-center justify-center"
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             opacity: isLightboxOpen ? 1 : 0,
             transition: 'opacity 0.3s ease-out'
@@ -251,8 +256,8 @@ export default function AwardsCarousel() {
           {/* Image container */}
           <div
             className="relative flex items-center justify-center"
-            style={{ 
-              maxWidth: '95vw', 
+            style={{
+              maxWidth: '95vw',
               maxHeight: '95vh',
               opacity: isLightboxOpen ? 1 : 0,
               transform: isLightboxOpen ? 'scale(1)' : 'scale(0.95)',
