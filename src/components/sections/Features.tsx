@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Image from 'next/image'
 import Link from 'next/link'
 import SectionHeading from './SectionHeading'
@@ -77,22 +78,20 @@ export default function Features() {
             <div
               key={idx}
               ref={el => { sectionRefs.current[idx] = el }}
-              className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 transition-all duration-1000 ${
-                isVisible 
-                  ? 'opacity-100 translate-y-0' 
+              className={`flex flex-col lg:flex-row items-center gap-12 lg:gap-20 transition-all duration-1000 ${isVisible
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-20'
-              }`}
+                }`}
             >
               {/* Image Column */}
-              <div 
-                className={`w-full lg:w-1/2 order-2 ${
-                  isLeft ? 'lg:order-1' : 'lg:order-2'
-                }`}
+              <div
+                className={`w-full lg:w-1/2 order-2 ${isLeft ? 'lg:order-1' : 'lg:order-2'
+                  }`}
               >
                 <div className="relative group">
                   {/* Outer glow/backdrop */}
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-lg opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200" />
-                  
+
                   {/* Grid or Single Image Wrapper */}
                   <div className="relative bg-white border border-neutral-200/60 p-3 rounded-2xl shadow-xl overflow-hidden">
                     {feature.images && feature.images.length > 1 ? (
@@ -111,12 +110,11 @@ export default function Features() {
                       </div>
                     ) : (
                       <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-neutral-100">
-                        <Image
-                          src={feature.images?.[0] || '/background.svg'}
-                          alt={feature.title}
+                        <DynamicMedia
+                          media={feature.images?.[0] || '/background.svg'}
+                          alt={`${feature.title} primary`}
                           fill
                           className="object-cover transition-transform duration-700 hover:scale-105"
-                          sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                       </div>
                     )}
@@ -125,10 +123,9 @@ export default function Features() {
               </div>
 
               {/* Text Column */}
-              <div 
-                className={`w-full lg:w-1/2 order-1 ${
-                  isLeft ? 'lg:order-2' : 'lg:order-1'
-                } space-y-6`}
+              <div
+                className={`w-full lg:w-1/2 order-1 ${isLeft ? 'lg:order-2' : 'lg:order-1'
+                  } space-y-6`}
               >
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100/50">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
@@ -140,7 +137,7 @@ export default function Features() {
                 <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-neutral-900 tracking-tight font-bricolage-display leading-[1.1]">
                   {feature.title}
                 </h3>
-                
+
                 <p className="text-lg md:text-xl text-neutral-600 font-medium leading-relaxed font-bricolage-text">
                   {feature.description}
                 </p>

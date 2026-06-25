@@ -4,6 +4,7 @@ import { Navbar, Footer, BackgroundLayout } from '@/components/layout'
 import { Gallery, SectionHeading, WhatWeDoPillarContent } from '@/components/sections'
 import { HowWeDoIt, Modalities, WhyChooseUs, CorporateLogos } from '@/components/corporate'
 import Image from 'next/image'
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
@@ -14,7 +15,7 @@ interface Service {
   _id: string;
   title: string;
   description: string;
-  image: string;
+  image: any;
   slug: string;
   href?: string;
 }
@@ -25,13 +26,13 @@ interface CategoryData {
   slug: string;
   heroTitle: string;
   heroSubtitle: string;
-  heroImage: string;
+  heroImage: any;
   descriptionParagraphs: string[];
   whatWeDoSubtitle?: string;
-  galleryImages?: string[];
+  galleryImages?: any[];
   partnerTitle?: string;
   partnerSubtitle?: string;
-  partnerImage?: string;
+  partnerImage?: any;
   services: Service[];
 }
 
@@ -176,7 +177,7 @@ export default function CategoryDetailPage() {
   };
 
   const galleryImages = (category.galleryImages && category.galleryImages.length > 0)
-    ? category.galleryImages.map(img => ({ src: img, alt: `${category.name} Gallery Image`, size: 'medium' as const }))
+    ? category.galleryImages.map(img => ({ src: img?.url || img, alt: `${category.name} Gallery Image`, size: 'medium' as const }))
     : defaultGalleries[category.slug] || [];
 
   return (
@@ -186,8 +187,8 @@ export default function CategoryDetailPage() {
         {/* Hero Section */}
         <section className="relative w-full h-[350px] md:h-[500px] lg:h-[700px] overflow-hidden">
           {category.heroImage ? (
-            <Image
-              src={category.heroImage}
+            <DynamicMedia
+              media={category.heroImage}
               alt={`${category.name} Hero`}
               fill
               className="object-cover"
@@ -269,8 +270,8 @@ export default function CategoryDetailPage() {
                     {/* Image Side */}
                     <div className="animate-what-we-do-image relative w-full md:w-1/2 h-[400px] md:h-[500px] overflow-hidden rounded-2xl">
                       {service.image ? (
-                        <Image
-                          src={service.image}
+                        <DynamicMedia
+                          media={service.image}
                           alt={service.title}
                           fill
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -329,8 +330,8 @@ export default function CategoryDetailPage() {
               
               <div className="max-w-full mx-auto flex items-center justify-center">
                 <div className="relative w-full max-w-6xl h-64 md:h-96 lg:h-[28rem]">
-                  <Image
-                    src={category.partnerImage}
+                  <DynamicMedia
+                    media={category.partnerImage}
                     alt={category.partnerTitle || "Partner Logos"}
                     fill
                     sizes="(min-width: 1024px) 960px, (min-width: 768px) 768px, 100vw"

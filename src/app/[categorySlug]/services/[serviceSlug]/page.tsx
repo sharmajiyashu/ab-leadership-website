@@ -29,7 +29,7 @@ interface ServiceData {
   _id: string;
   title: string;
   description: string;
-  image?: string;
+  image?: any;
   slug: string;
   subtitle?: string;
   longDescription?: string;
@@ -98,7 +98,7 @@ export default function DynamicServicePage() {
         <SubserviceHeroSection 
           title={service.title}
           subtitle={service.subtitle || service.description}
-          imageSrc={service.image || ""}
+          media={service.image}
         />
 
         {/* Detailed Long Description */}

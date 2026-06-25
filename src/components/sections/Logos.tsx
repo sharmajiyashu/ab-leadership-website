@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image'
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 
@@ -20,20 +20,42 @@ const Logos = () => {
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+    // Fetch homepage settings for title & description
     fetch(`${apiUrl}/v1/api/app/homepage/settings`)
       .then(res => res.json())
       .then(res => {
         if (res.success && res.data?.partnersSection) {
           setPartnersInfo({
             title: res.data.partnersSection.title || "Proud to work with",
-            description: res.data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics..."
+            description: res.data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
           })
-          if (Array.isArray(res.data.partnersSection.tabs) && res.data.partnersSection.tabs.length > 0) {
-            setLogoTabs(res.data.partnersSection.tabs)
+        }
+      })
+      .catch(err => console.error("Error loading partners info:", err));
+
+    // Fetch categories for the logo tabs
+    fetch(`${apiUrl}/v1/api/app/categories`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data)) {
+          const activeCategories = res.data.filter((cat: any) => cat.showPartnerOnHome !== false && cat.partnerImage);
+          if (activeCategories.length > 0) {
+            const newTabs = activeCategories.map((cat: any) => {
+              const partnerImg = cat.partnerImage;
+              const partnerUrl = typeof partnerImg === 'string' ? partnerImg : partnerImg?.url;
+              return {
+                id: cat.slug,
+                label: cat.name,
+                src: partnerUrl,
+                alt: cat.partnerTitle || `Proud to work with - ${cat.name}`
+              };
+            });
+            setLogoTabs(newTabs);
           }
         }
       })
-      .catch(err => console.error("Error loading partners:", err))
+      .catch(err => console.error("Error loading categories for logos:", err));
   }, [])
 
   const LOGO_TABS = logoTabs;
@@ -101,7 +123,7 @@ const Logos = () => {
 
     const currentSectionRef = sectionRef.current
     const currentTextRef = textRef.current
-    
+
     if (currentSectionRef) {
       sectionObserver.observe(currentSectionRef)
     }
@@ -128,7 +150,7 @@ const Logos = () => {
   // Calculate animation values based on scroll progress
   // Use max progress to ensure animation only happens once
   const effectiveProgress = isSectionVisible ? Math.max(scrollProgress, maxProgress) : maxProgress
-  
+
   // Separate animation for text - earlier trigger and different easing
   const textProgress = Math.min(1, effectiveProgress * 2.5) // Faster text animation
   const textOpacity = Math.min(1, textProgress * 1.5)
@@ -143,7 +165,7 @@ const Logos = () => {
   return (
     <section ref={sectionRef} className="pt-4 pb-12">
       <div className="container mx-auto px-4">
-        <div 
+        <div
           ref={textRef}
           className="transition-all duration-700 ease-out"
           style={{
@@ -174,11 +196,10 @@ const Logos = () => {
               aria-selected={activeTabIndex === index}
               aria-controls="logos-panel"
               id={`logos-tab-${tab.id}`}
-              className={`pb-1 text-base md:text-lg border-b-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-600 ${
-                activeTabIndex === index
-                  ? 'font-semibold text-gray-900 border-gray-800'
-                  : 'font-medium text-gray-600 border-transparent hover:text-gray-800 hover:border-gray-300'
-              }`}
+              className={`pb-1 text-base md:text-lg border-b-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-600 ${activeTabIndex === index
+                ? 'font-semibold text-gray-900 border-gray-800'
+                : 'font-medium text-gray-600 border-transparent hover:text-gray-800 hover:border-gray-300'
+                }`}
               onClick={() => setActiveTabIndex(index)}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowLeft' && index > 0) setActiveTabIndex(index - 1)
@@ -191,9 +212,9 @@ const Logos = () => {
             </button>
           ))}
         </div>
-        
+
         <div className="max-w-full mx-auto" id="logos-panel" role="tabpanel" aria-labelledby={`logos-tab-${LOGO_TABS[activeTabIndex].id}`}>
-          <div 
+          <div
             ref={imageRef}
             className="flex items-center justify-center transition-all duration-700 ease-out"
             style={{
@@ -204,15 +225,14 @@ const Logos = () => {
           >
             <div className="relative w-full max-w-6xl h-64 md:h-96 lg:h-[28rem]">
               {LOGO_TABS.map((tab, index) => (
-                <Image
+                <DynamicMedia
                   key={tab.id}
-                  src={tab.src}
+                  media={tab.src}
                   alt={tab.alt}
                   fill
                   sizes="(min-width: 1024px) 960px, (min-width: 768px) 768px, 100vw"
-                  className={`object-contain transition-opacity duration-500 ${
-                    activeTabIndex === index ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  className={`object-contain transition-opacity duration-500 ${activeTabIndex === index ? 'opacity-100' : 'opacity-0'
+                    }`}
                   priority={index === 0}
                   aria-hidden={activeTabIndex !== index}
                 />

@@ -1,5 +1,6 @@
 'use client'
 
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Image from 'next/image'
 import Slider from 'react-infinite-logo-slider'
 import { useState, useEffect } from 'react'
@@ -11,7 +12,7 @@ const Hero = () => {
   const [heroData, setHeroData] = useState<{
     title: string;
     description: string;
-    image: string;
+    image: any;
     logosTitle: string;
     logos: string[];
   }>({
@@ -28,12 +29,16 @@ const Hero = () => {
       .then(res => res.json())
       .then(res => {
         if (res.success && res.data) {
+          const heroImg = res.data.hero?.image;
+          const heroUrl = typeof heroImg === 'string' ? heroImg : heroImg?.url;
           setHeroData({
             title: res.data.hero?.title || "Shaping Wellbeing & Leadership Journeys",
             description: res.data.hero?.description || "Corporates · Classrooms · Communities · Clinics",
-            image: res.data.hero?.image || "/home/hero/IMG_2190.JPG",
+            image: heroUrl || "/home/hero/IMG_2190.JPG",
             logosTitle: res.data.logosTitle || "As Featured On",
-            logos: Array.isArray(res.data.logos) && res.data.logos.length > 0 ? res.data.logos : []
+            logos: Array.isArray(res.data.logos) && res.data.logos.length > 0 
+              ? res.data.logos.map((logo: any) => typeof logo === 'string' ? logo : logo?.url).filter(Boolean) 
+              : []
           })
         }
       })
@@ -47,7 +52,7 @@ const Hero = () => {
     setDisplayedText("")
     setIsTypingComplete(false)
     setSubtitleOpacity(0)
-    
+
     const startDelay = setTimeout(() => {
       const typingInterval = setInterval(() => {
         if (currentIndex < titleText.length) {
@@ -89,8 +94,8 @@ const Hero = () => {
     <section className="pb-4">
       {/* Full Width Image */}
       <div className="relative w-full h-[400px] md:h-[550px] lg:h-[750px] overflow-hidden">
-        <Image
-          src={heroData.image}
+        <DynamicMedia
+          media={heroData.image}
           alt="Abhishek Banerji - Professional Portrait"
           fill
           className="object-cover"
@@ -102,13 +107,12 @@ const Hero = () => {
           <div className="text-center text-white px-4 w-full">
             <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold font-bricolage-display whitespace-nowrap">
               {displayedText}
-              <span 
-                className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${
-                  showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'
-                }`}
+              <span
+                className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'
+                  }`}
               />
             </h1>
-            <p 
+            <p
               className="text-lg md:text-2xl lg:text-3xl max-w-3xl mx-auto font-bricolage-text transition-opacity duration-1000 ease-in-out mt-4"
               style={{ opacity: subtitleOpacity }}
             >
@@ -117,7 +121,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Company Logos Section */}
       <div className="bg-transparent hero-logo-slider">
         <div className="max-w-full mx-auto bg-transparent">
@@ -137,8 +141,8 @@ const Hero = () => {
             ).map((logo, index) => (
               <Slider.Slide key={index}>
                 <div className="flex items-center justify-center min-w-[300px] h-48 overflow-hidden">
-                  <Image
-                    src={logo}
+                  <DynamicMedia
+                    media={logo}
                     alt={`Featured Logo ${index + 1}`}
                     width={300}
                     height={300}

@@ -1,15 +1,15 @@
 'use client'
 
-import Image from 'next/image'
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import { useState, useEffect } from 'react'
 
 interface SubserviceHeroSectionProps {
   title: string;
   subtitle: string;
-  imageSrc: string;
+  media: any;
 }
 
-export default function SubserviceHeroSection({ title, subtitle, imageSrc }: SubserviceHeroSectionProps) {
+export default function SubserviceHeroSection({ title, subtitle, media }: SubserviceHeroSectionProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [subtitleOpacity, setSubtitleOpacity] = useState(0);
@@ -54,9 +54,9 @@ export default function SubserviceHeroSection({ title, subtitle, imageSrc }: Sub
 
   return (
     <section className="relative w-full overflow-hidden h-[500px] md:h-[600px]">
-      {imageSrc ? (
-        <Image
-          src={imageSrc}
+      {media ? (
+        <DynamicMedia
+          media={media}
           alt={title}
           fill
           className="object-cover object-center"

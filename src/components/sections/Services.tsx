@@ -1,6 +1,6 @@
 'use client'
 
-import Image from 'next/image'
+import { DynamicMedia } from '@/components/ui/DynamicMedia'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import SectionHeading from './SectionHeading'
@@ -220,57 +220,58 @@ const Services = () => {
                     transitionDelay: isVisible ? `${index * 200}ms` : '0ms',
                     transitionTimingFunction: isVisible ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
                   }}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                <div
-                  className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
-                  style={service.scale ? {
-                    transform: `scale(${service.scale})${service.translateY ? ` translateY(${service.translateY}px)` : ''}`
-                  } : undefined}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
                 >
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    className="object-cover"
-                    style={{
-                      objectPosition: service.objectPosition || 'center'
-                    }}
-                  />
-                </div>
-
-                {/* Strong gradient overlay for text readability - always visible */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent"></div>
-
-                {/* Description and button - always visible */}
-                <div className="absolute bottom-0 left-0 right-0 z-10">
-                  <div className="px-6 py-6">
-                    <p className="text-gray-200 text-sm leading-relaxed mb-6 font-bricolage-text" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)' }}>
-                      {service.description}
-                    </p>
-                    <div
-                      className="px-4 py-2 border text-white rounded-lg font-medium inline-block transition-all duration-300"
+                  <div
+                    className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
+                    style={service.scale ? {
+                      transform: `scale(${service.scale})${service.translateY ? ` translateY(${service.translateY}px)` : ''}`
+                    } : undefined}
+                  >
+                    <DynamicMedia
+                      media={service.image}
+                      alt={service.title}
+                      fill
+                      className="object-cover"
                       style={{
-                        backgroundColor: hoveredIndex === index ? service.buttonHoverColor : 'transparent',
-                        borderColor: hoveredIndex === index ? service.buttonHoverColor : 'white'
+                        objectPosition: service.objectPosition || 'center'
                       }}
-                    >
-                      Learn More
+                    />
+                  </div>
+
+                  {/* Strong gradient overlay for text readability - always visible */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent"></div>
+
+                  {/* Description and button - always visible */}
+                  <div className="absolute bottom-0 left-0 right-0 z-10">
+                    <div className="px-6 py-6">
+                      <p className="text-gray-200 text-sm leading-relaxed mb-6 font-bricolage-text" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)' }}>
+                        {service.description}
+                      </p>
+                      <div
+                        className="px-4 py-2 border text-white rounded-lg font-medium inline-block transition-all duration-300"
+                        style={{
+                          backgroundColor: hoveredIndex === index ? service.buttonHoverColor : 'transparent',
+                          borderColor: hoveredIndex === index ? service.buttonHoverColor : 'white'
+                        }}
+                      >
+                        Learn More
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Title - positioned above description */}
-                <div className="absolute bottom-0 left-0 right-0 -translate-y-36 z-20">
-                  <div className="px-6 py-6">
-                    <h3 className="text-3xl font-bold text-white font-bricolage-display" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3)' }}>
-                      {service.title}
-                    </h3>
+                  {/* Title - positioned above description */}
+                  <div className="absolute bottom-0 left-0 right-0 -translate-y-36 z-20">
+                    <div className="px-6 py-6">
+                      <h3 className="text-3xl font-bold text-white font-bricolage-display" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3)' }}>
+                        {service.title}
+                      </h3>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            )})}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
