@@ -6,8 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import SectionHeading from './SectionHeading'
 import { Loader } from '@/components/ui/Loader'
 
-const Services = () => {
-  const [isLoading, setIsLoading] = useState(true)
+const Services = ({ initialData }: { initialData?: any[] }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -59,20 +58,12 @@ const Services = () => {
     }
   ]
 
-  const [servicesList, setServicesList] = useState<any[]>(defaultServices)
-
-  useEffect(() => {
-    import('@/lib/api').then(({ get }) => {
-      get<any>('/v1/api/app/services?showOnHome=true')
-        .then(data => {
-          if (Array.isArray(data)) {
-            setServicesList(data.slice(0, 4));
-          }
-        })
-        .catch(err => console.error("Error fetching services:", err))
-        .finally(() => setIsLoading(false));
-    });
-  }, [])
+  const [servicesList, setServicesList] = useState<any[]>(() => {
+    if (initialData && Array.isArray(initialData) && initialData.length > 0) {
+      return initialData.slice(0, 4);
+    }
+    return defaultServices;
+  });
 
   const services = servicesList;
 
@@ -183,9 +174,7 @@ const Services = () => {
   const textTranslateY = (1 - textProgress) * 60 // More dramatic text movement
   const textScale = 0.95 + (textProgress * 0.05) // Subtle scale effect for text
 
-  if (isLoading) {
-    return <Loader />
-  }
+
 
   return (
     <>

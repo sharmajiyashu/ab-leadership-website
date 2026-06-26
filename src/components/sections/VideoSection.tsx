@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Loader } from '@/components/ui/Loader'
 
-const VideoSection = () => {
-  const [isLoading, setIsLoading] = useState(true)
+const VideoSection = ({ initialData }: { initialData?: any }) => {
   const [isVideoVisible, setIsVideoVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
@@ -117,28 +116,22 @@ const VideoSection = () => {
     description: string;
     videoUrl: string;
     paragraphs?: string[];
-  }>({
-    title: "See Us In Action",
-    description: "Watch our introductory video feature.",
-    videoUrl: "https://www.youtube.com/watch?v=IKDfjU1huhI&t=103s",
-    paragraphs: []
+  }>(() => {
+    if (initialData?.videoSection) {
+      return {
+        title: initialData.videoSection.title || "See Us In Action",
+        description: initialData.videoSection.description || "Watch our introductory video feature.",
+        videoUrl: initialData.videoSection.videoUrl || "https://www.youtube.com/watch?v=IKDfjU1huhI&t=103s",
+        paragraphs: initialData.videoSection.paragraphs || []
+      };
+    }
+    return {
+      title: "See Us In Action",
+      description: "Watch our introductory video feature.",
+      videoUrl: "https://www.youtube.com/watch?v=IKDfjU1huhI&t=103s",
+      paragraphs: []
+    };
   })
-
-  useEffect(() => {
-    import('@/lib/api').then(({ get }) => {
-      get<any>('/v1/api/app/homepage/settings')
-        .then(data => {
-          if (data?.videoSection) {
-            setVideoData(prev => ({
-              ...prev,
-              ...data.videoSection
-            }));
-          }
-        })
-        .catch(err => console.error("Error loading video section:", err))
-        .finally(() => setIsLoading(false));
-    });
-  }, [])
 
   const paragraphs = Array.isArray(videoData.paragraphs) && videoData.paragraphs.length > 0
     ? videoData.paragraphs
@@ -193,9 +186,7 @@ const VideoSection = () => {
   const textTranslateY = (1 - textProgress) * 60 // More dramatic text movement
   const textScale = 0.95 + (textProgress * 0.05) // Subtle scale effect for text
 
-  if (isLoading) {
-    return <Loader />
-  }
+
 
   return (
     <section ref={sectionRef} className="relative px-32 py-4">

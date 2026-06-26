@@ -10,6 +10,12 @@ export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
   const { categorySlug: slug } = await params
+  
+  // Ignore static files like sw.js, favicon.ico, etc.
+  if (slug.includes('.')) {
+    return { title: 'Not Found' }
+  }
+
   try {
     const data = await get<any>(`/v1/api/app/categories/slug/${slug}`, { next: { revalidate: 60 } });
 

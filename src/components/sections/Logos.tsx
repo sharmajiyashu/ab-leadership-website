@@ -12,52 +12,39 @@ const DEFAULT_LOGO_TABS = [
   { id: 'clinics', label: 'Clinics', src: '/home/logo/clinics.png', alt: 'Proud to work with – Clinics' },
 ]
 
-const Logos = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [partnersInfo, setPartnersInfo] = useState({
-    title: "Proud to work with",
-    description: "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+const Logos = ({ initialData, categoriesData }: { initialData?: any; categoriesData?: any[] }) => {
+  const [partnersInfo, setPartnersInfo] = useState(() => {
+    if (initialData?.partnersSection) {
+      return {
+        title: initialData.partnersSection.title || "Proud to work with",
+        description: initialData.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+      };
+    }
+    return {
+      title: "Proud to work with",
+      description: "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
+    };
   })
-  const [logoTabs, setLogoTabs] = useState<any[]>(DEFAULT_LOGO_TABS)
+  const [logoTabs, setLogoTabs] = useState<any[]>(() => {
+    if (Array.isArray(categoriesData)) {
+      const activeCategories = categoriesData.filter((cat: any) => cat.showPartnerOnHome !== false && cat.partnerImage);
+      if (activeCategories.length > 0) {
+        return activeCategories.map((cat: any) => {
+          const partnerImg = cat.partnerImage;
+          const partnerUrl = typeof partnerImg === 'string' ? partnerImg : partnerImg?.url;
+          return {
+            id: cat.slug,
+            label: cat.name,
+            src: partnerUrl,
+            alt: cat.partnerTitle || `Proud to work with - ${cat.name}`
+          };
+        });
+      }
+    }
+    return DEFAULT_LOGO_TABS;
+  })
 
-  useEffect(() => {
-    import('@/lib/api').then(({ get }) => {
-      // Fetch homepage settings for title & description
-      get<any>('/v1/api/app/homepage/settings')
-        .then(data => {
-          if (data?.partnersSection) {
-            setPartnersInfo({
-              title: data.partnersSection.title || "Proud to work with",
-              description: data.partnersSection.description || "Organisations across corporates, classrooms, communities, and clinics who partner with us to create meaningful, lasting change."
-            })
-          }
-        })
-        .catch(err => console.error("Error loading partners info:", err));
 
-      // Fetch categories for the logo tabs
-      get<any>('/v1/api/app/categories')
-        .then(data => {
-          if (Array.isArray(data)) {
-            const activeCategories = data.filter((cat: any) => cat.showPartnerOnHome !== false && cat.partnerImage);
-            if (activeCategories.length > 0) {
-              const newTabs = activeCategories.map((cat: any) => {
-                const partnerImg = cat.partnerImage;
-                const partnerUrl = typeof partnerImg === 'string' ? partnerImg : partnerImg?.url;
-                return {
-                  id: cat.slug,
-                  label: cat.name,
-                  src: partnerUrl,
-                  alt: cat.partnerTitle || `Proud to work with - ${cat.name}`
-                };
-              });
-              setLogoTabs(newTabs);
-            }
-          }
-        })
-        .catch(err => console.error("Error loading categories for logos:", err))
-        .finally(() => setIsLoading(false));
-    });
-  }, [])
 
   const LOGO_TABS = logoTabs;
   const [isSectionVisible, setIsSectionVisible] = useState(false)
@@ -163,9 +150,7 @@ const Logos = () => {
   const imageTranslateY = (1 - textProgress) * 60
   const imageScale = 1.0 + (textProgress * 0.05) // Reduced scale for less zoom
 
-  if (isLoading) {
-    return <Loader />
-  }
+
 
   return (
     <section ref={sectionRef} className="pt-4 pb-12">

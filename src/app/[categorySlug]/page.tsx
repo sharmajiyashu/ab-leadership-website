@@ -77,7 +77,10 @@ export default function CategoryDetailPage() {
   const whatWeDoDescription = useScrollAnimation<HTMLParagraphElement>(0, 0.3, '-100px')
 
   useEffect(() => {
-    if (!categorySlug) return
+    if (!categorySlug || categorySlug.includes('.')) {
+      setLoading(false);
+      return;
+    }
     setLoading(true)
     import('@/lib/api').then(({ get }) => {
       get<CategoryData>(`/v1/api/app/categories/slug/${categorySlug}`)

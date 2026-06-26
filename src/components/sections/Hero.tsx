@@ -6,8 +6,7 @@ import Slider from 'react-infinite-logo-slider'
 import { useState, useEffect } from 'react'
 import { Loader } from '@/components/ui/Loader'
 
-const Hero = () => {
-  const [isLoading, setIsLoading] = useState(true)
+const Hero = ({ initialData }: { initialData?: any }) => {
   const [displayedText, setDisplayedText] = useState('')
   const [isTypingComplete, setIsTypingComplete] = useState(false)
   const [subtitleOpacity, setSubtitleOpacity] = useState(0)
@@ -18,36 +17,28 @@ const Hero = () => {
     image: any;
     logosTitle: string;
     logos: string[];
-  }>({
-    title: "Shaping Wellbeing & Leadership Journeys",
-    description: "Corporates · Classrooms · Communities · Clinics",
-    image: "/home/hero/IMG_2190.JPG",
-    logosTitle: "As Featured On",
-    logos: []
+  }>(() => {
+    if (initialData) {
+      const heroImg = initialData.hero?.image;
+      const heroUrl = typeof heroImg === 'string' ? heroImg : heroImg?.url;
+      return {
+        title: initialData.hero?.title || "Shaping Wellbeing & Leadership Journeys",
+        description: initialData.hero?.description || "Corporates · Classrooms · Communities · Clinics",
+        image: heroUrl || "/home/hero/IMG_2190.JPG",
+        logosTitle: initialData.logosTitle || "As Featured On",
+        logos: Array.isArray(initialData.logos) && initialData.logos.length > 0 
+          ? initialData.logos.map((logo: any) => typeof logo === 'string' ? logo : logo?.url).filter(Boolean) 
+          : []
+      };
+    }
+    return {
+      title: "Shaping Wellbeing & Leadership Journeys",
+      description: "Corporates · Classrooms · Communities · Clinics",
+      image: "/home/hero/IMG_2190.JPG",
+      logosTitle: "As Featured On",
+      logos: []
+    };
   })
-
-  useEffect(() => {
-    import('@/lib/api').then(({ get }) => {
-      get<any>('/v1/api/app/homepage/settings')
-        .then(data => {
-          if (data) {
-            const heroImg = data.hero?.image;
-            const heroUrl = typeof heroImg === 'string' ? heroImg : heroImg?.url;
-            setHeroData({
-              title: data.hero?.title || "Shaping Wellbeing & Leadership Journeys",
-              description: data.hero?.description || "Corporates · Classrooms · Communities · Clinics",
-              image: heroUrl || "/home/hero/IMG_2190.JPG",
-              logosTitle: data.logosTitle || "As Featured On",
-              logos: Array.isArray(data.logos) && data.logos.length > 0 
-                ? data.logos.map((logo: any) => typeof logo === 'string' ? logo : logo?.url).filter(Boolean) 
-                : []
-            })
-          }
-        })
-        .catch(err => console.error("Error fetching homepage settings:", err))
-        .finally(() => setIsLoading(false))
-    });
-  }, [])
 
   const titleText = heroData.title
 
@@ -94,9 +85,6 @@ const Hero = () => {
     }
   }, [isTypingComplete])
 
-  if (isLoading) {
-    return <Loader />
-  }
 
   return (
     <section className="pb-4">

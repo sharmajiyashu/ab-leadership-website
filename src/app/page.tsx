@@ -34,7 +34,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {};
 }
 
-export default function Home() {
+export default async function Home() {
+  const [homepageData, servicesData, categoriesData] = await Promise.all([
+    get<any>('/v1/api/app/homepage/settings', { next: { revalidate: 60 } }),
+    get<any>('/v1/api/app/services?showOnHome=true', { next: { revalidate: 60 } }),
+    get<any>('/v1/api/app/categories', { next: { revalidate: 60 } })
+  ]);
+
   return (
     <div className="min-h-screen">
       <div
@@ -45,11 +51,11 @@ export default function Home() {
       <div className="relative z-10 -mt-[100vh]">
         <Navbar />
         <main>
-          <Hero />
-          <VideoSection />
-          <Services />
-          <SDGs />
-          <Logos />
+          <Hero initialData={homepageData} />
+          <VideoSection initialData={homepageData} />
+          <Services initialData={servicesData} />
+          <SDGs initialData={homepageData} />
+          <Logos initialData={homepageData} categoriesData={categoriesData} />
         </main>
         <Footer />
       </div>

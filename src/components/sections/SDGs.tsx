@@ -45,46 +45,39 @@ const DEFAULT_SDG_DATA = [
   },
 ]
 
-const SDGs = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [sdgContainer, setSdgContainer] = useState({
-    title: "Sustainable Development Goals",
-    description: "Our work is aligned with the United Nations Sustainable Development Goals, contributing to a more equitable, healthy, and sustainable world.",
-    backgroundImage: "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+const SDGs = ({ initialData }: { initialData?: any }) => {
+  const [sdgContainer, setSdgContainer] = useState(() => {
+    if (initialData?.sdgs) {
+      const bgImg = initialData.sdgs.backgroundImage;
+      const bgUrl = typeof bgImg === 'string' ? bgImg : bgImg?.url;
+      return {
+        title: initialData.sdgs.title || "Sustainable Development Goals",
+        description: initialData.sdgs.description || "Our work is aligned with the United Nations Sustainable Development Goals...",
+        backgroundImage: bgUrl || "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+      };
+    }
+    return {
+      title: "Sustainable Development Goals",
+      description: "Our work is aligned with the United Nations Sustainable Development Goals, contributing to a more equitable, healthy, and sustainable world.",
+      backgroundImage: "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
+    };
   })
-  const [goalsList, setGoalsList] = useState<any[]>(DEFAULT_SDG_DATA)
+  const [goalsList, setGoalsList] = useState<any[]>(() => {
+    if (initialData?.sdgs && Array.isArray(initialData.sdgs.goals) && initialData.sdgs.goals.length > 0) {
+      return initialData.sdgs.goals.map((g: any, idx: number) => {
+        const iconUrl = typeof g === 'string' ? g : (g?.url || g?.icon?.url);
+        return {
+          id: idx,
+          name: `Goal ${idx + 1}`,
+          color: "#1E3A8A",
+          image: iconUrl || "/home/sdgs/SDG3.jpeg" // Fallback if no icon
+        };
+      });
+    }
+    return DEFAULT_SDG_DATA;
+  })
 
-  useEffect(() => {
-    import('@/lib/api').then(({ get }) => {
-      get<any>('/v1/api/app/homepage/settings')
-        .then(data => {
-          if (data?.sdgs) {
-            const bgImg = data.sdgs.backgroundImage;
-            const bgUrl = typeof bgImg === 'string' ? bgImg : bgImg?.url;
 
-            setSdgContainer({
-              title: data.sdgs.title || "Sustainable Development Goals",
-              description: data.sdgs.description || "Our work is aligned with the United Nations Sustainable Development Goals...",
-              backgroundImage: bgUrl || "/home/sdgs/sdg-reel-aspect-ratio-1660-700.png"
-            })
-            if (Array.isArray(data.sdgs.goals) && data.sdgs.goals.length > 0) {
-              const mapped = data.sdgs.goals.map((g: any, idx: number) => {
-                const iconUrl = typeof g === 'string' ? g : (g?.url || g?.icon?.url);
-                return {
-                  id: idx,
-                  name: `Goal ${idx + 1}`,
-                  color: "#1E3A8A",
-                  image: iconUrl || "/home/sdgs/SDG3.jpeg" // Fallback if no icon
-                };
-              })
-              setGoalsList(mapped)
-            }
-          }
-        })
-        .catch(err => console.error("Error loading SDGs settings:", err))
-        .finally(() => setIsLoading(false));
-    });
-  }, [])
   const [isVisible, setIsVisible] = useState(false)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -195,9 +188,6 @@ const SDGs = () => {
   const textTranslateY = (1 - textProgress) * 60
   const textScale = 0.95 + (textProgress * 0.05)
 
-  if (isLoading) {
-    return <Loader />
-  }
 
   return (
     <section ref={sectionRef} className="relative pt-4 pb-4 px-4 md:px-0 overflow-hidden min-h-[584px] flex flex-col justify-center">
