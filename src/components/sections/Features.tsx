@@ -57,9 +57,11 @@ export default function Features() {
       return observer
     })
 
+    const currentRefs = sectionRefs.current;
+
     return () => {
       observers.forEach((obs, idx) => {
-        const ref = sectionRefs.current[idx]
+        const ref = currentRefs[idx]
         if (obs && ref) obs.unobserve(ref)
       })
     }

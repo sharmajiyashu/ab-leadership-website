@@ -4,7 +4,7 @@ import { get } from '@/lib/api';
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const data = await get<any>('/v1/api/app/theatre/settings', { cache: 'no-store' });
+    const data = await get<any>('/v1/api/app/theatre/settings', { next: { revalidate: 60 } });
 
     if (data?.seo) {
       const seo = data.seo;

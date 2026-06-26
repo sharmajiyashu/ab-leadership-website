@@ -44,8 +44,7 @@ interface MediaCarouselProps {
 }
 
 export default function MediaCarousel({ images }: MediaCarouselProps) {
-  if (!images || images.length === 0) return null;
-  const carouselImages = images;
+  const carouselImages = images && images.length > 0 ? images : DEFAULT_MEDIA_IMAGES;
   const visibleCount = VISIBLE_COUNT;
   const totalImages = carouselImages.length;
 

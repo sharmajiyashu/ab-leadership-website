@@ -33,8 +33,7 @@ interface AwardsCarouselProps {
 }
 
 export default function AwardsCarousel({ images }: AwardsCarouselProps) {
-  if (!images || images.length === 0) return null;
-  const awardImages = images;
+  const awardImages = images && images.length > 0 ? images : DEFAULT_AWARD_IMAGES;
   const visibleCount = 4;
   const totalImages = awardImages.length;
 
