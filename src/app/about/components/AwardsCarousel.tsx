@@ -34,7 +34,7 @@ interface AwardsCarouselProps {
 
 export default function AwardsCarousel({ images }: AwardsCarouselProps) {
   const awardImages = images && images.length > 0 ? images : DEFAULT_AWARD_IMAGES;
-  const visibleCount = 4;
+  const [visibleCount, setVisibleCount] = useState(4);
   const totalImages = awardImages.length;
 
   // Triple the images for seamless infinite loop
@@ -45,6 +45,21 @@ export default function AwardsCarousel({ images }: AwardsCarouselProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(4);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -201,7 +216,7 @@ export default function AwardsCarousel({ images }: AwardsCarouselProps) {
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex justify-center mt-8 gap-2">
+          <div className="hidden sm:flex justify-center mt-8 gap-2">
             {Array.from({ length: totalImages }).map((_, index) => (
               <button
                 key={index}
@@ -210,8 +225,8 @@ export default function AwardsCarousel({ images }: AwardsCarouselProps) {
                   setCurrentIndex(totalImages + index);
                 }}
                 className={`h-2.5 rounded-full transition-all duration-500 ease-out ${getOriginalIndex(currentIndex) === index
-                    ? 'bg-[#0047AB] w-10'
-                    : 'bg-gray-300 hover:bg-gray-400 w-2.5'
+                  ? 'bg-[#0047AB] w-10'
+                  : 'bg-gray-300 hover:bg-gray-400 w-2.5'
                   }`}
                 aria-label={`Go to slide ${index + 1}`}
               />

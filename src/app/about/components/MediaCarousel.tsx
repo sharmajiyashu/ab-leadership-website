@@ -37,15 +37,13 @@ const DEFAULT_MEDIA_IMAGES = [
   '/aboutMe/media/28.png',
 ];
 
-const VISIBLE_COUNT = 4;
-
 interface MediaCarouselProps {
   images?: string[];
 }
 
 export default function MediaCarousel({ images }: MediaCarouselProps) {
   const carouselImages = images && images.length > 0 ? images : DEFAULT_MEDIA_IMAGES;
-  const visibleCount = VISIBLE_COUNT;
+  const [visibleCount, setVisibleCount] = useState(4);
   const totalImages = carouselImages.length;
 
   // Triple the images for seamless infinite loop
@@ -56,6 +54,22 @@ export default function MediaCarousel({ images }: MediaCarouselProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(4);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -212,7 +226,7 @@ export default function MediaCarousel({ images }: MediaCarouselProps) {
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex justify-center mt-8 gap-2">
+          <div className="hidden sm:flex justify-center mt-8 gap-2">
             {Array.from({ length: totalImages }).map((_, index) => (
               <button
                 key={index}

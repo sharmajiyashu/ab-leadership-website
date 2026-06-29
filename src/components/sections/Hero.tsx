@@ -101,7 +101,7 @@ const Hero = ({ initialData }: { initialData?: any }) => {
         {/* Semi-transparent black overlay */}
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center pt-20">
           <div className="text-center text-white px-4 w-full">
-            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold font-bricolage-display whitespace-nowrap">
+            <h1 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold font-bricolage-display">
               {displayedText}
               <span
                 className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'

@@ -282,6 +282,13 @@ const Navbar = () => {
             </Link>
           </div>
 
+          {/* Mobile Brand Name */}
+          <div className="lg:hidden flex-1 flex justify-start items-center">
+            <Link href="/" className={`${textColor} text-xl sm:text-2xl font-normal font-lovelace whitespace-nowrap cursor-pointer`}>
+              {headerName}
+            </Link>
+          </div>
+
           {/* Right: Theatre, Blog, Contact */}
           <div className="hidden lg:flex flex-1 justify-end items-center gap-x-8 xl:gap-x-10">
             <Link href="/theatre" className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}>
