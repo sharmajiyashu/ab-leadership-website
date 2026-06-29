@@ -223,7 +223,7 @@ function TheatreContent({ data }: { data: TheatreData }) {
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <div className="text-center text-white px-4 max-w-5xl">
-              <h1 className="text-4xl md:text-6xl font-bold font-bricolage-display">
+              <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold font-bricolage-display">
                 {displayedText}
                 <span
                   className={`inline-block w-[3px] h-[1em] bg-white ml-1 align-middle transition-opacity duration-100 ${showCursor && !isTypingComplete ? 'opacity-100' : 'opacity-0'
@@ -231,7 +231,7 @@ function TheatreContent({ data }: { data: TheatreData }) {
                 />
               </h1>
               <p
-                className="text-xl md:text-2xl max-w-3xl mx-auto font-bricolage-text transition-opacity duration-1000 ease-in-out mt-2"
+                className="text-base sm:text-xl md:text-2xl max-w-3xl mx-auto font-bricolage-text transition-opacity duration-1000 ease-in-out mt-2"
                 style={{ opacity: subtitleOpacity }}
               >
                 {subtitleText}

@@ -1,13 +1,13 @@
 import { ReactNode, Ref } from 'react'
 
 export const sectionHeadingTitleClass =
-  'text-4xl md:text-5xl font-bold font-bricolage-display'
+  'text-3xl sm:text-4xl md:text-5xl font-bold font-bricolage-display'
 
 export const subsectionHeadingTitleClass =
-  'text-3xl md:text-4xl font-bold font-bricolage-display'
+  'text-2xl sm:text-3xl md:text-4xl font-bold font-bricolage-display'
 
 export const subserviceHeadingTitleClass =
-  'text-3xl md:text-4xl font-bold font-lovelace'
+  'text-2xl sm:text-3xl md:text-4xl font-bold font-lovelace'
 
 export const sectionHeadingSubtitleClass =
   'text-lg text-center max-w-3xl mx-auto leading-relaxed font-bricolage-text'

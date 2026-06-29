@@ -104,7 +104,7 @@ export default function ContactClient({ initialContactSettings }: { initialConta
           />
           <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
             <div className="text-center text-white">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-bricolage-display">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-bricolage-display">
                 {initialContactSettings?.hero?.title || "Get In Touch"}
               </h1>
               <p className="text-lg md:text-xl max-w-2xl mx-auto px-4">

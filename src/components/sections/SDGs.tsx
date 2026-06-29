@@ -143,7 +143,7 @@ const SDGs = ({ initialData }: { initialData?: any }) => {
           setIsVisible(true)
         }
       },
-      { threshold: 0.2, rootMargin: '-100px' }
+      { threshold: 0.05, rootMargin: '0px' }
     )
 
     const currentSectionRef = sectionRef.current

@@ -66,7 +66,7 @@ function RoadStep({ step, index }: { step: { title: string; description: string 
     <motion.li
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-120px' }}
+      viewport={{ once: true, margin: '-60px' }}
       transition={{
         duration: 0.7,
         delay: index * 0.05,
@@ -78,7 +78,7 @@ function RoadStep({ step, index }: { step: { title: string; description: string 
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
-        viewport={{ once: true, margin: '-120px' }}
+        viewport={{ once: true, margin: '-60px' }}
         transition={{
           duration: 0.4,
           delay: index * 0.05 + 0.2,
@@ -91,10 +91,10 @@ function RoadStep({ step, index }: { step: { title: string; description: string 
 
       {/* Content */}
       <div>
-        <h3 className="text-4xl font-semibold text-white mb-2 tracking-tight font-bricolage-display md:text-3xl" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+        <h3 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight font-bricolage-display" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
           {step.title}
         </h3>
-        <p className="text-lg text-white leading-relaxed tracking-tight font-bricolage-text md:text-base" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+        <p className="text-base md:text-lg text-white leading-relaxed tracking-tight font-bricolage-text" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
           {step.description}
         </p>
       </div>
@@ -153,11 +153,11 @@ const HowWeDoIt = ({ data }: HowWeDoItProps) => {
         className="relative pt-16 pb-28 md:pt-12 md:pb-24 overflow-hidden"
       >
         {/* Background Image */}
-        <motion.div 
+        <motion.div
           ref={backgroundRef}
           className="absolute inset-0 z-0 overflow-hidden"
         >
-          <motion.div 
+          <motion.div
             className="absolute inset-0 w-full h-full"
             style={{ y: backgroundY, scale: 1.1 }}
           >
@@ -170,7 +170,7 @@ const HowWeDoIt = ({ data }: HowWeDoItProps) => {
                 priority
               />
             ) : (
-              <DynamicMedia 
+              <DynamicMedia
                 media={activeBg}
                 alt="Background"
                 fill

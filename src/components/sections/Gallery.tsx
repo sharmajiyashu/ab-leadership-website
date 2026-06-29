@@ -70,8 +70,8 @@ const Gallery = ({ images }: GalleryProps) => {
         }
       },
       {
-        threshold: 0.3,
-        rootMargin: '-100px',
+        threshold: 0.1,
+        rootMargin: '0px',
       }
     )
 

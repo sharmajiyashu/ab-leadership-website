@@ -9,9 +9,19 @@ const VideoSection = ({ initialData }: { initialData?: any }) => {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isSectionVisible, setIsSectionVisible] = useState(false)
   const [maxProgress, setMaxProgress] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const videoRef = useRef<HTMLDivElement>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -177,7 +187,7 @@ const VideoSection = ({ initialData }: { initialData?: any }) => {
   const effectiveProgress = isSectionVisible ? Math.max(scrollProgress, maxProgress) : maxProgress
 
   const fadeOpacity = Math.min(1, effectiveProgress * 2)
-  const scaleValue = 1 + (effectiveProgress * 0.2)
+  const scaleValue = isMobile ? 1 : 1 + (effectiveProgress * 0.2)
   const translateY = (1 - effectiveProgress) * 50
 
   // Separate animation for text - earlier trigger and different easing
@@ -189,89 +199,92 @@ const VideoSection = ({ initialData }: { initialData?: any }) => {
 
 
   return (
-    <section ref={sectionRef} className="relative px-32 py-4">
-      <div className="max-w-7xl mx-auto space-y-12 relative z-10">
-        {/* Combined Text Section - Above Video */}
-        <div
-          ref={textRef}
-          className="max-w-7xl mx-auto pb-8 transition-all duration-700 ease-out"
-          style={{
-            opacity: textOpacity,
-            transform: `translateY(${textTranslateY}px) scale(${textScale})`,
-            willChange: 'opacity, transform'
-          }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              {leftParagraphs.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            <div className="space-y-6">
-              {rightParagraphs.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* YouTube Video */}
-        <div ref={videoRef} className="flex justify-center">
+    <section ref={sectionRef} className="relative py-4">
+      {/* Text content with padding */}
+      <div className="px-4 sm:px-12 md:px-24 lg:px-32">
+        <div className="max-w-7xl mx-auto">
+          {/* Combined Text Section - Above Video */}
           <div
-            className="w-full max-w-4xl pb-16 transition-all duration-700 ease-out"
+            ref={textRef}
+            className="pb-8 transition-all duration-700 ease-out"
             style={{
-              opacity: fadeOpacity,
-              transform: `translateY(${translateY * 0.5}px) scale(${scaleValue})`,
+              opacity: textOpacity,
+              transform: `translateY(${textTranslateY}px) scale(${textScale})`,
               willChange: 'opacity, transform'
             }}
           >
-            <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl bg-black">
-              {isVideoVisible ? (
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&start=${startTime}&rel=0&modestbranding=1&playsinline=1&controls=1&showinfo=0&iv_load_policy=3&cc_load_policy=0&fs=1&color=white&theme=dark&widget_referrer=${typeof window !== 'undefined' ? window.location.origin : ''}&enablejsapi=0`}
-                  title="TEDx Talk - Lethal Loyalty: What's Keeping You Safe might be Keeping You Stuck | ABHISHEK BANERJI"
-                  className="absolute inset-0 w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-                  <div className="text-center text-white">
-                    <div className="w-20 h-20 mx-auto mb-4 bg-red-600 rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                    <p className="text-lg font-medium">TEDx Talk</p>
-                    <p className="text-sm text-gray-300">Loading...</p>
-                  </div>
-                </div>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                {leftParagraphs.map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              <div className="space-y-6">
+                {rightParagraphs.map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-800 font-normal text-justify font-bricolage-text"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Know More Button */}
-        <div className="flex justify-center pb-12">
-          <Link
-            href="/about"
-            className="px-8 py-3 bg-gray-900 hover:bg-[#0047AB] text-white rounded-lg font-bold text-lg transition-colors duration-300 font-bricolage-text"
-          >
-            Know More
-          </Link>
+      {/* YouTube Video - Full width on mobile, contained on larger screens */}
+      <div ref={videoRef} className="w-full px-0 sm:px-12 md:px-24 lg:px-32">
+        <div
+          className="w-full sm:max-w-4xl sm:mx-auto pb-16 transition-all duration-700 ease-out"
+          style={{
+            opacity: fadeOpacity,
+            transform: `translateY(${translateY * 0.5}px) scale(${scaleValue})`,
+            willChange: 'opacity, transform'
+          }}
+        >
+          <div className="relative aspect-video sm:rounded-lg overflow-hidden shadow-2xl bg-black">
+            {isVideoVisible ? (
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&start=${startTime}&rel=0&modestbranding=1&playsinline=1&controls=1&showinfo=0&iv_load_policy=3&cc_load_policy=0&fs=1&color=white&theme=dark&widget_referrer=${typeof window !== 'undefined' ? window.location.origin : ''}&enablejsapi=0`}
+                title="TEDx Talk - Lethal Loyalty: What's Keeping You Safe might be Keeping You Stuck | ABHISHEK BANERJI"
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                <div className="text-center text-white">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-red-600 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-medium">TEDx Talk</p>
+                  <p className="text-sm text-gray-300">Loading...</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Know More Button */}
+      <div className="flex justify-center pb-12">
+        <Link
+          href="/about"
+          className="px-8 py-3 bg-gray-900 hover:bg-[#0047AB] text-white rounded-lg font-bold text-lg transition-colors duration-300 font-bricolage-text"
+        >
+          Know More
+        </Link>
       </div>
     </section>
   )
