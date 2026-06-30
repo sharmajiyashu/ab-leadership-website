@@ -362,7 +362,7 @@ export default function CategoryDetailPage() {
 
         {/* Dynamic / Fallback Gallery Component */}
         {galleryImages.length > 0 && (
-          <section className="py-16">
+          <section className="pb-8">
             <Gallery key={category.slug} images={galleryImages} />
           </section>
         )}

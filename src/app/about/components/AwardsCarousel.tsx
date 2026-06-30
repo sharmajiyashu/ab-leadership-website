@@ -148,7 +148,7 @@ export default function AwardsCarousel({ images }: AwardsCarouselProps) {
   };
 
   return (
-    <section className="py-16 overflow-hidden">
+    <section className="py-10 overflow-hidden">
       <div className="container mx-auto px-4">
         <SectionHeading level="subsection" title="Awards Gallery" titleClassName="mb-10" />
 

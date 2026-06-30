@@ -66,14 +66,14 @@ const Navbar = () => {
   const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  
+
   // Dynamic categories state
   const [categories, setCategories] = useState<Category[]>(fallbackCategories)
   const [openDropdownSlug, setOpenDropdownSlug] = useState<string | null>(null)
-  
+
   // Global settings state
   const [headerName, setHeaderName] = useState("Abhishek Banerji")
-  
+
   const openTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
   const closeTimeoutRefs = useRef<Record<string, NodeJS.Timeout>>({})
 
@@ -164,7 +164,7 @@ const Navbar = () => {
       clearTimeout(closeTimeoutRefs.current[slug])
       delete closeTimeoutRefs.current[slug]
     }
-    
+
     // Clear other pending opens
     Object.keys(openTimeoutRefs.current).forEach(s => {
       if (s !== slug) {
@@ -205,7 +205,7 @@ const Navbar = () => {
   const mobileArrowColor = showBackgroundImage ? 'text-gray-400' : isScrolled ? 'text-gray-300' : 'text-gray-400'
 
   const navbarContent = (
-    <nav 
+    <nav
       className={`${bgClass} fixed inset-x-0 top-0 w-full z-[9999] transition-all duration-300`}
       style={showBackgroundImage ? {
         backgroundImage: 'url(/background.svg)',
@@ -228,7 +228,7 @@ const Navbar = () => {
 
             {/* Services (4Cs) Dropdown */}
             <div className="relative group">
-              <div 
+              <div
                 className={`${textColor} px-3 xl:px-4 h-16 lg:h-20 flex items-center text-lg xl:text-xl font-medium transition-colors font-bricolage-text whitespace-nowrap ${linkHoverClass} cursor-pointer`}
                 onClick={(e) => e.preventDefault()}
               >
@@ -242,7 +242,7 @@ const Navbar = () => {
                   {categories.map((category) => {
                     const isDropdownOpen = openDropdownSlug === category.slug;
                     return (
-                      <div 
+                      <div
                         key={category._id}
                         className="relative"
                         onMouseEnter={() => handleMouseEnter(category.slug)}
@@ -256,9 +256,9 @@ const Navbar = () => {
                           <div className={`absolute left-full top-0 ml-1 w-64 ${dropdownPanelClass} backdrop-blur-sm rounded-md shadow-sm border-l-2 z-20 opacity-0 animate-[fadeIn_0.25s_ease-out_0.05s_forwards]`}>
                             <div className="py-1.5">
                               {category.services.map((service) => (
-                                <Link 
+                                <Link
                                   key={service._id}
-                                  href={service.href || `/${category.slug}/services/${service.slug}`} 
+                                  href={service.href || `/${category.slug}/services/${service.slug}`}
                                   className={`block px-4 py-2.5 text-[14px] ${dropdownSubLinkText} ${linkHoverClass} hover:border-gray-900 transition-all duration-300 ease-out font-bricolage-text leading-[1.7] border-l-2 border-transparent pl-5 cursor-pointer`}
                                 >
                                   {service.title}
@@ -327,7 +327,7 @@ const Navbar = () => {
             <Link href="/" onClick={closeMenu} className={`block px-3 py-2 text-lg font-medium ${mobileLinkText} ${linkHoverClass} rounded-md transition-colors cursor-pointer`}>
               Home
             </Link>
-            
+
             <Link href="/about" onClick={closeMenu} className={`block px-3 py-2 text-lg font-medium ${mobileLinkText} ${linkHoverClass} rounded-md transition-colors cursor-pointer`}>
               About Me
             </Link>
@@ -345,20 +345,31 @@ const Navbar = () => {
                   const isMobileSubOpen = openDropdownSlug === category.slug;
                   return (
                     <div key={category._id}>
-                      <div 
-                        className={`flex items-center justify-between w-full px-3 py-2.5 text-base font-medium ${dropdownLinkText} cursor-pointer ${linkHoverClass} rounded-md transition-all duration-300 ease-out`}
-                        onClick={() => setOpenDropdownSlug(isMobileSubOpen ? null : category.slug)}
+                      <div
+                        className={`flex items-center justify-between w-full text-base font-medium ${dropdownLinkText} rounded-md transition-all duration-300 ease-out`}
                       >
-                        <span className="leading-[1.7]">{category.name}</span>
-                        <span className={`ml-2 ${mobileArrowColor} transition-transform duration-300 ease-out ${isMobileSubOpen ? 'rotate-90' : ''}`}>→</span>
+                        <Link
+                          href={`/${category.slug}`}
+                          onClick={closeMenu}
+                          className={`flex-1 px-3 py-2.5 leading-[1.7] cursor-pointer ${linkHoverClass} rounded-l-md`}
+                        >
+                          {category.name}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => setOpenDropdownSlug(isMobileSubOpen ? null : category.slug)}
+                          className={`px-4 py-2.5 ${linkHoverClass} rounded-r-md transition-all duration-300 ease-out focus:outline-none`}
+                        >
+                          <span className={`inline-block ${mobileArrowColor} transition-transform duration-300 ease-out ${isMobileSubOpen ? 'rotate-90' : ''}`}>→</span>
+                        </button>
                       </div>
                       {isMobileSubOpen && category.services && category.services.length > 0 && (
                         <div className={`pl-4 space-y-0.5 mt-1 border-l-2 ${mobileSubBorder} ml-2`}>
                           {category.services.map((service) => (
-                            <Link 
+                            <Link
                               key={service._id}
-                              href={service.href || `/${category.slug}/services/${service.slug}`} 
-                              onClick={closeMenu} 
+                              href={service.href || `/${category.slug}/services/${service.slug}`}
+                              onClick={closeMenu}
                               className={`block px-3 py-2 text-sm font-normal ${mobileSubLinkText} ${linkHoverClass} rounded-md transition-all duration-300 ease-out leading-[1.7] cursor-pointer`}
                             >
                               {service.title}
@@ -390,7 +401,7 @@ const Navbar = () => {
   )
 
   if (!mounted) return null
-  
+
   return createPortal(navbarContent, document.body)
 }
 

@@ -158,7 +158,7 @@ export default function MediaCarousel({ images }: MediaCarouselProps) {
   };
 
   return (
-    <section className="pt-4 pb-16 overflow-hidden">
+    <section className="pt-4 pb-10 overflow-hidden">
       <div className="container mx-auto px-4">
         <SectionHeading level="subsection" title="Media Coverage" titleClassName="mb-10" />
 

@@ -57,7 +57,7 @@ export default function RecognitionSection({ title, intro, points, imageSrc }: R
   const displayPoints = points && points.length > 0 ? points : DEFAULT_POINTS;
 
   return (
-    <section className="py-16">
+    <section className="pt-8 pb-10">
       <div className="container mx-auto px-4">
         <SectionHeading title={title || "Recognition & Milestones"} titleClassName="mb-12" />
 

@@ -168,7 +168,7 @@ const Gallery = ({ images }: GalleryProps) => {
   }
 
   return (
-    <section className="pb-16">
+    <section className="pb-6">
       <div className="container mx-auto px-4">
         {/* Title */}
         <div 
@@ -177,8 +177,8 @@ const Gallery = ({ images }: GalleryProps) => {
         >
           <SectionHeading
             title="Gallery"
-            className="pt-16"
-            titleClassName={`mb-12 transition-all duration-1000 ease-out ${
+            className="pt-4"
+            titleClassName={`mb-6 transition-all duration-1000 ease-out ${
               isTitleVisible
                 ? 'opacity-100 translate-y-0 scale-100 visible'
                 : 'opacity-0 translate-y-8 scale-95 invisible'

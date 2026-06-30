@@ -241,7 +241,7 @@ function TheatreContent({ data }: { data: TheatreData }) {
         </section>
 
         {/* Content Section - Alternating Text and Images */}
-        <section className="py-16">
+        <section className="pt-16 pb-8">
           <div className="container mx-auto px-4">
             {/* Section 1 - Text Left, Image Right */}
             {sec1Text && (
@@ -311,10 +311,10 @@ function TheatreContent({ data }: { data: TheatreData }) {
 
         {/* Gallery Section */}
         {galleryImages.length > 0 && (
-          <section className="pb-16">
+          <section className="pb-6">
             <div className="container mx-auto px-4">
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-gray-800 py-16 font-bricolage-display">Gallery</h2>
+                <h2 className="text-4xl font-bold text-gray-800 pt-4 pb-6 font-bricolage-display">Gallery</h2>
               </div>
               <div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[280px] lg:auto-rows-[320px]">

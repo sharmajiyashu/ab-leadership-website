@@ -104,7 +104,7 @@ const Footer = () => {
   const titleTranslateY = mounted ? (1 - titleProgress) * 40 : 40
 
   return (
-    <footer ref={sectionRef} className="relative text-white py-16 overflow-hidden">
+    <footer ref={sectionRef} className="relative text-white py-12 overflow-hidden">
       {/* Background image */}
       <div
         className="absolute inset-0"

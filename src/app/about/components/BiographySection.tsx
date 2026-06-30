@@ -16,7 +16,7 @@ export default function BiographySection({ content, imageSrc }: BiographySection
 
   return (
     <section className="min-h-[600px]">
-      <div className="container mx-auto pt-16 pb-8 px-4">
+      <div className="container mx-auto pt-16 pb-4 px-4">
         <SectionHeading title="Biography" titleClassName="mb-12" />
 
         <div className="max-w-7xl mx-auto">
